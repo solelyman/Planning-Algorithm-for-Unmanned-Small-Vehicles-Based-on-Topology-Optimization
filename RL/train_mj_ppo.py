@@ -43,7 +43,7 @@ def make_env(seed, n_obs, goal_dist, goal_margin, detour_ratio=0.6):
 class ArrivalEvalCallback(BaseCallback):
     """每 eval_every 步, 在主进程用当前策略跑 n_episodes 评估到达率/碰撞率.
     记录最近评估结果供门槛判定; 若 min_arrival 指定, 到达率达标才会停止 (配合 learn 循环)
-    ★ 每次评估后实时保存模型到 eval_save_path (供 live GUI 边训练边看最新策略)"""
+    每次评估后实时保存模型到 eval_save_path (供 live GUI 边训练边看最新策略)"""
 
     def __init__(self, n_obs, goal_dist, goal_margin=0.15, eval_every=98304, n_episodes=20, seed=9999, verbose=0, detour_ratio=0.6, eval_save_path=None):
         super().__init__(verbose)
@@ -91,7 +91,7 @@ class ArrivalEvalCallback(BaseCallback):
         self.last_collision = col / n
         print(f"[eval] 步数={steps} 到达率={self.last_arrival:.2f} 碰撞={self.last_collision:.2f} "
               f"出界={out / n:.2f} 均长={np.mean(lens):.0f} 均奖={np.mean(rews):.1f}", flush=True)
-        # ★ 实时保存最新模型, live GUI 每几秒 reload 就能看到训练中策略
+        # 实时保存最新模型, live GUI 每几秒 reload 就能看到训练中策略
         if self.eval_save_path:
             try:
                 self.model.save(self.eval_save_path)
@@ -106,7 +106,7 @@ class ArrivalEvalCallback(BaseCallback):
 
 
 def show_rollout_gui(model, args, lo, hi):
-    """训练完弹 MuJoCo GUI 实时展示当前模型 rollout (阻塞直到用户关窗).
+    """训练完弹 MuJoCo GUI 实时展示当前模型 rollout (阻塞直到关窗).
     固定俯视可缩放视角 (TRACKING); 目标金色球实时标记; 每局结束自动 reset 新起点"""
     import mujoco
     import mujoco.viewer as mjv
@@ -237,7 +237,7 @@ def main():
             arr = eval_cb.last_arrival
             print(f"[round{round_no}] 保存 {path} | 到达率={arr:.2f} | 累计用时 {(time.time() - t0) / 60:.1f}min", flush=True)
             if args.gui:
-                # 训练后开 GUI 实时展示当前模型 rollout (阻塞直到用户关窗, 可看清训练效果)
+                # 训练后开 GUI 实时展示当前模型 rollout (阻塞直到关窗, 可看清训练效果)
                 show_rollout_gui(model, args, lo, hi)
             if arr >= args.min_arrival:
                 print(f"[train] 到达率 {arr:.2f} >= 门槛 {args.min_arrival:.2f}, 达标进入下一阶段", flush=True)

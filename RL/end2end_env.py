@@ -22,7 +22,7 @@ XML_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "u
 
 
 class End2EndNavEnv(gym.Env):
-    # ★ ugv 真车动力学 (用户确认: max 0.28 m/s; 低速差速车)
+    # ugv 真车动力学 (max 0.28 m/s; 低速差速车)
     MAX_LIN = 0.28           # 最大前进线速度 (m/s)
     MAX_ANG = 2.0            # 最大角速度 (rad/s)
     DELTA_LIN = 0.5          # 仅供旧代码/老师动作比例换算保留, 主线不再用 delta-v
@@ -102,7 +102,7 @@ class End2EndNavEnv(gym.Env):
                 self.model.body_pos[i] = np.array([30.0, 30.0, 0.3])
                 self.model.body_quat[i] = np.array([1.0, 0.0, 0.0, 0.0])
         self._obs = []
-        # ★ 闭合障碍的空腔 (house 4墙 / triangle 3墙 围成的内部): 激光穿不过墙,
+        # 闭合障碍的空腔 (house 4墙 / triangle 3墙 围成的内部): 激光穿不过墙,
         #   空腔对导航等价于实体, 起/目标/路径都绝不能进去
         self._cavities = []
         if isinstance(self.n_obstacles, str):
@@ -193,7 +193,7 @@ class End2EndNavEnv(gym.Env):
         return False
 
     def _place_nav2_layout(self):
-        """★ 官方 DRL-Transformer SquareWorld2.world 精确布局 (与 gazebo square_world2.sdf 1:1 对齐):
+        """官方 DRL-Transformer SquareWorld2.world 精确布局 (与 gazebo square_world2.sdf 1:1 对齐):
         - n_obstacles='nav2_lcorner': 只留 L 角 (专项学绕角)
         - n_obstacles='nav2_house'  : 只留红房子 (专项学穿门)
         - n_obstacles='nav2_furniture': 只留家具
@@ -248,7 +248,7 @@ class End2EndNavEnv(gym.Env):
         group_order = ["house", "cross", "triangle", "lcorner", "table", "cabinet", "bookshelf", "hydrant"]
         # nav2_seqN = 按官方列表顺序取前 N 个障碍 (每次只加 1 个, 平滑渐进)
         if self.n_obstacles == "nav2_shuffle":
-            # ★ 布局内随机摆放: 保持 gz 障碍类型/数量/朝向, 但每次 reset 按组随机挪位
+            # 布局内随机摆放: 保持 gz 障碍类型/数量/朝向, 但每次 reset 按组随机挪位
             # 让策略学"通用避障"而非"背地图", 泛化到 gz 成功率更高
             layout = self._shuffle_groups(full)
         elif self.n_obstacles and isinstance(self.n_obstacles, str) and self.n_obstacles.startswith("nav2_seq"):
@@ -264,14 +264,14 @@ class End2EndNavEnv(gym.Env):
                 layout = [b for b in full if b[5] in want]
             else:
                 layout = [b for b in full if want == "all" or b[5] == want]
-        # ★ 红房子专项 (nav2_house): 把红房子整体平移到地图中央 — 用户要求
+        # 红房子专项 (nav2_house): 把红房子整体平移到地图中央 — 训练要求
         # "红房子放中间, UGV 起点与终点在红房子两侧, 必须绕过去".
         # 平移只改位置不改朝向/尺寸, 专项训练每局起点+目标都在红房子两侧必绕
         if self.n_obstacles == "nav2_house" and layout:
             cx0 = float(np.mean([b[0] for b in layout]))
             cy0 = float(np.mean([b[1] for b in layout]))
             layout = [(b[0] - cx0, b[1] - cy0, b[2], b[3], b[4], b[5], b[6], b[7], b[8]) for b in layout]
-        # ★ 闭合障碍空腔: 同类型的墙 (house 4面 / triangle 3面) 首尾相接围成内部空腔,
+        # 闭合障碍空腔: 同类型的墙 (house 4面 / triangle 3面) 首尾相接围成内部空腔,
         #   激光穿不过墙 -> 空腔等价实体. 用各墙中心连线多边形近似空腔 (墙厚 0.075,
         #   中心连线已足够保守). 其余类型 (cross 十字/lcorner L) 不闭合, 无空腔
         self._cavities = []
@@ -351,7 +351,7 @@ class End2EndNavEnv(gym.Env):
     def _point_free(self, x, y, margin=0.55):
         if abs(x) > self.ROOM_HALF - margin or abs(y) > self.ROOM_HALF - margin:
             return False
-        # ★ 空腔内部 = 实体: 起/目标绝不能落在红房子/三角空腔内 (进了就出不来)
+        # 空腔内部 = 实体: 起/目标绝不能落在红房子/三角空腔内 (进了就出不来)
         if self._point_in_cavity(x, y, margin=max(0.0, margin - 0.30)):
             return False
         # OBB 碰撞检测: 点变换到 box 局部系, 落在半边长+margin 之外才算 free (支持斜墙)
@@ -398,11 +398,11 @@ class End2EndNavEnv(gym.Env):
         return False
 
     def _sample_detour(self):
-        """★ 强制绕障局 (不随机碰运气): 主动选一个障碍, 起点放在其一侧,
+        """强制绕障局 (不随机碰运气): 主动选一个障碍, 起点放在其一侧,
         目标放在其正后方另一侧 (起点-障碍中心-目标近似共线) -> 起点->目标
         直线必然穿过障碍中心, 100% 必须绕行. 优先绕大障碍(红房子墙/长墙),
         避免选桌腿 0.02m 小障碍. 红房子专项 (nav2_house) 时红房子在中间,
-        起点/目标在两侧, 正是用户要的"必须绕红房子"."""
+        起点/目标在两侧, 正是要的"必须绕红房子"."""
         if not self._obs:
             return None
         # 按面积降序: 优先绕红房子/十字/三角/L 这种大障碍
@@ -426,7 +426,7 @@ class End2EndNavEnv(gym.Env):
                     continue
                 if not self._goal_reachable(gx, gy):
                     continue
-                # ★ 起点/目标必须在所有障碍外部 (闭合障碍如红房子内是死胡同,
+                # 起点/目标必须在所有障碍外部 (闭合障碍如红房子内是死胡同,
                 #   车一出生就卡死, 永远出不来). _point_free 只查距墙>0.35,
                 #   不查"是否在闭合障碍内部", 这里用 OBB 点内判定补上
                 if self._point_in_any_obb(sx, sy) or self._point_in_any_obb(gx, gy):
@@ -591,11 +591,11 @@ class End2EndNavEnv(gym.Env):
 
     def vprm_demo_path(self, start=None):
         """全局路径: A* 大膨胀 + 带障碍斥力的平滑 (生成尽量远离障碍的可跟踪轨迹).
-        用户思路: 全局膨胀大一点让路径尽可能避开障碍, 平滑轨迹也带避障,
+        设计思路: 全局膨胀大一点让路径尽可能避开障碍, 平滑轨迹也带避障,
         后续局部控制按动力学跟随即可."""
         occ = set()
         PATH_CELL, PATH_BOUND = 0.2, 5.3   # 墙在 ±5.425, 路径规划界内
-        INFLATE = 0.75   # ★ 全局大膨胀: 路径离障碍最小间隙 0.75m (碰撞0.28+车0.10+余量),
+        INFLATE = 0.75   # 全局大膨胀: 路径离障碍最小间隙 0.75m (碰撞0.28+车0.10+余量),
                          #   让全局路径本身就远离障碍, 后续跟踪更安全
         # 精确栅格化: 每个栅格点用 OBB 距离判定 (支持斜墙)
         obstacles = self._walls + self._obs
@@ -603,7 +603,7 @@ class End2EndNavEnv(gym.Env):
         for gx in range(gmin, gmax + 1):
             for gy in range(gmin, gmax + 1):
                 px, py = gx * PATH_CELL, gy * PATH_CELL
-                # ★ 空腔内部 = 实体: 红房子/三角空腔栅格直接占用, A* 绝不穿越
+                # 空腔内部 = 实体: 红房子/三角空腔栅格直接占用, A* 绝不穿越
                 if self._point_in_cavity(px, py, margin=0.30):
                     occ.add((gx, gy))
                     continue
@@ -617,15 +617,15 @@ class End2EndNavEnv(gym.Env):
                     if math.hypot(dx, dy) < INFLATE:
                         occ.add((gx, gy))
                         break
-        # ★ start 必须显式传入 (reset 时 qpos 尚未赋成 start, 直接用会从错误起点规划)
+        # start 必须显式传入 (reset 时 qpos 尚未赋成 start, 直接用会从错误起点规划)
         pos = np.asarray(start, dtype=float) if start is not None else self.data.qpos[0:2].copy()
         goal = self.goal.copy()
-        # ★ 用网格 A* (occ 已按 OBB 精确膨胀, astar 内不再二次膨胀)
+        # 用网格 A* (occ 已按 OBB 精确膨胀, astar 内不再二次膨胀)
         path = astar_grid_plan(occ, tuple(pos), tuple(goal),
                                path_cell=PATH_CELL, path_bound=PATH_BOUND, inflate=0.0)
         if path is None or len(path) < 2:
             return path
-        # ★ 插值加密到 ~0.2m 间隔 (纯追踪不切弯)
+        # 插值加密到 ~0.2m 间隔 (纯追踪不切弯)
         dense = [np.asarray(path[0], dtype=float)]
         for i in range(len(path) - 1):
             a = np.asarray(path[i], dtype=float)
@@ -634,7 +634,7 @@ class End2EndNavEnv(gym.Env):
             n = max(1, int(round(seg / 0.2)))
             for k in range(1, n + 1):
                 dense.append(a + (b - a) * (k / n))
-        # ★ 平滑 + 障碍斥力: 迭代把靠近障碍的轨迹点往开阔方向推 (保持端点/拓扑不变)
+        # 平滑 + 障碍斥力: 迭代把靠近障碍的轨迹点往开阔方向推 (保持端点/拓扑不变)
         #   这样平滑轨迹本身就远离障碍, 局部控制器跟上去更安全
         pts = dense
         for _ in range(12):
@@ -647,7 +647,7 @@ class End2EndNavEnv(gym.Env):
                     if d < dmin:
                         dmin, dcx, dcy = d, cx, cy
                 if dmin < 0.9 and dmin > 0.05:
-                    # ★ 推离方向: 直接沿 点->障碍中心 向量 (永远远离中心, 简单可靠).
+                    # 推离方向: 直接沿 点->障碍中心 向量 (永远远离中心, 简单可靠).
                     #   旧版用 OBB 外法向, 点在角落/障碍内时方向错/符号反 -> 往墙里推
                     vec = np.array([p[0] - dcx, p[1] - dcy])
                     norm = float(np.linalg.norm(vec))
@@ -660,7 +660,7 @@ class End2EndNavEnv(gym.Env):
                         moved = True
             if not moved:
                 break
-        # ★ 强制连接终点: A* 大膨胀(0.75) 下 goal 附近可能被膨胀圈覆盖, 路径终点
+        # 强制连接终点: A* 大膨胀(0.75) 下 goal 附近可能被膨胀圈覆盖, 路径终点
         #   停在离 goal 最近自由格, 不连终点 -> 直接 append goal 点, 保证连到终点
         if len(pts) >= 2:
             if float(np.linalg.norm(np.asarray(pts[-1]) - goal)) > 0.25:
@@ -678,7 +678,7 @@ class End2EndNavEnv(gym.Env):
         return math.hypot(dx, dy)
 
     def _dwa_action(self, path, lookahead=0.5):
-        """LOS/lookahead 局部跟踪 (用户: 全局大膨胀+平滑避障后, 局部按动力学跟上):
+        """LOS/lookahead 局部跟踪 ( 全局大膨胀+平滑避障后, 局部按动力学跟上):
         1. 找平滑轨迹上距车最近点
         2. 沿轨迹弧长取 lookahead 前方点作为引导目标
         3. 朝引导点转向 (角速度由角度偏差 PID 式给出), 线速度偏差大时减速
@@ -686,7 +686,7 @@ class End2EndNavEnv(gym.Env):
         """
         pos = self.data.qpos[0:2]
         yaw = self._get_yaw()
-        # ★ 距真实目标 < 1.2m: 直接朝目标全速 (不再沿 path, 避免到终点附近
+        # 距真实目标 < 1.2m: 直接朝目标全速 (不再沿 path, 避免到终点附近
         #   卡在 path[-1] 与 GOAL_RADIUS 之间的盲区. 终点连线覆盖最后一段)
         d_goal = float(np.linalg.norm(self.goal - pos))
         if d_goal < 1.2:
@@ -715,14 +715,14 @@ class End2EndNavEnv(gym.Env):
         goal_ang = math.atan2(target[1] - pos[1], target[0] - pos[0]) - yaw
         goal_ang = (goal_ang + math.pi) % (2 * math.pi) - math.pi
         beta = goal_ang / math.pi                       # [-1,1]
-        # ★ 提速: 偏差减速系数 0.6->0.35 (以前偏差大就大幅减速, 平均速度低
+        # 提速: 偏差减速系数 0.6->0.35 (以前偏差大就大幅减速, 平均速度低
         #   800 步到不了. 现在保持前进, 转向交给 a1)
         a1 = float(np.clip(beta * 1.6, -1.0, 1.0))
         a0 = float(np.clip(1.0 - abs(beta) * 0.35, 0.0, 1.0))
-        # ★ 到终点 0.8m 内: 全速直冲 (不减速), 直接连接终点
+        # 到终点 0.8m 内: 全速直冲 (不减速), 直接连接终点
         if d_goal < 0.8:
             a0 = 1.0
-        # ★ 前方过近: 障碍在安全圈内, 必须处理.
+        # 前方过近: 障碍在安全圈内, 必须处理.
         #   若两侧都近(墙角/窄口) -> 原地转向到较开阔侧 (a0=0, 不打滑磨),
         #   避免"减速顶墙慢慢磨" (ep8/10/12 卡在红房子墙角就是这问题)
         ranges = self._get_ranges()
@@ -737,7 +737,7 @@ class End2EndNavEnv(gym.Env):
                 a1 = -0.7; a0 = 0.2
             else:
                 # 两侧都堵 = 被墙角夹住: 原地转永远出不来 (转到哪都近),
-                # ★ 必须倒车脱困: 边倒边转向较开阔侧 (ep8/10/12 卡死根因)
+                # 必须倒车脱困: 边倒边转向较开阔侧 (ep8/10/12 卡死根因)
                 a0 = -0.5
                 a1 = 0.8 if left >= right else -0.8
         return np.array([a0, a1], dtype=np.float32)
@@ -797,10 +797,10 @@ class End2EndNavEnv(gym.Env):
             self._rng = np.random.default_rng(seed)
         self._place_obstacles()
         start, self.goal = self._sample_spawn()
-        self._path = self.vprm_demo_path(start=start)   # ★ 全局绕障路径 (A*), 空地图=None -> 直线
+        self._path = self.vprm_demo_path(start=start)   # 全局绕障路径 (A*), 空地图=None -> 直线
 
         self.data.qpos[0:2] = start
-        # ★ 初始朝向: 沿 A* 路径首段方向 (出生就朝绕行方向, 避免随机朝向
+        # 初始朝向: 沿 A* 路径首段方向 (出生就朝绕行方向, 避免随机朝向
         #   导致 LOS 边转边走切弯钻墙 — ep8/10/12 卡死根因). 无路径=朝目标
         if self._path is not None and len(self._path) >= 2:
             p0 = np.asarray(self._path[0], dtype=float)
@@ -860,7 +860,7 @@ class End2EndNavEnv(gym.Env):
 
     def step(self, action):
         a0, a1 = float(action[0]), float(action[1])
-        # ★ 动作映射: lin=a0*MAX_LIN 允许倒车 (贴墙可脱困), ang=a1*MAX_ANG
+        # 动作映射: lin=a0*MAX_LIN 允许倒车 (贴墙可脱困), ang=a1*MAX_ANG
         self.lin_vel = float(np.clip(a0 * self.MAX_LIN, -self.MAX_LIN, self.MAX_LIN))
         self.ang_vel = float(np.clip(a1 * self.MAX_ANG, -self.MAX_ANG, self.MAX_ANG))
         lin, ang = self.lin_vel, self.ang_vel
@@ -869,12 +869,12 @@ class End2EndNavEnv(gym.Env):
         dt = self.DT
         self.data.qpos[0] += lin * math.cos(yaw) * dt
         self.data.qpos[1] += lin * math.sin(yaw) * dt
-        # ★ 墙碰撞: 位置 clamp 在墙内 (车被墙顶住不穿墙), 激光持续扫到墙 -> 策略被迫学脱困
+        # 墙碰撞: 位置 clamp 在墙内 (车被墙顶住不穿墙), 激光持续扫到墙 -> 策略被迫学脱困
         wall_lim = self.ROOM_HALF - 0.25   # 5.15 (墙内表面 5.275 - 车半径 0.1)
         before_wall = self.data.qpos[0:2].copy()
         self.data.qpos[0] = np.clip(self.data.qpos[0], -wall_lim, wall_lim)
         self.data.qpos[1] = np.clip(self.data.qpos[1], -wall_lim, wall_lim)
-        # ★ 障碍碰撞 clamp (OBB, 支持斜墙): 车被顶在障碍外 R=0.30 处 (激光<0.28 就物理过不去 = 必须绕行).
+        # 障碍碰撞 clamp (OBB, 支持斜墙): 车被顶在障碍外 R=0.30 处 (激光<0.28 就物理过不去 = 必须绕行).
         #   对齐 gazebo 真碰撞: 车体半径 0.10 + 安全余量 0.20, 激光 0.28 即被顶住 -> 策略学"绕"而非"挤"
         px, py = float(self.data.qpos[0]), float(self.data.qpos[1])
         R = 0.30
@@ -903,7 +903,7 @@ class End2EndNavEnv(gym.Env):
             # 局部系修正位置 -> 世界系
             self.data.qpos[0] = cx + nx * cosy - ny * siny
             self.data.qpos[1] = cy + nx * siny + ny * cosy
-        # ★ 真碰撞判定: 本次移动被 clamp 挡住 (想走但顶墙/顶障碍 = 撞)
+        # 真碰撞判定: 本次移动被 clamp 挡住 (想走但顶墙/顶障碍 = 撞)
         #   before_wall = 积分后"想去的位姿"; clamp 后如果被推回 -> 顶墙/顶障碍 = 真碰撞
         self._hit_wall = float(np.linalg.norm(self.data.qpos[0:2] - before_wall)) > 1e-6 and \
                          float(np.linalg.norm(lin)) > 0.01 and self.step_count >= 50
@@ -920,15 +920,15 @@ class End2EndNavEnv(gym.Env):
         ranges = self._get_ranges()
         min_laser = float(ranges.min())
 
-        # ★ 碰撞判定: 真实物理接触 (base_link 与墙/障碍接触 = 真碰, 对齐 gazebo).
-        #   用户: 障碍物边缘+安全距离就判碰撞太严格 (有误差正常), 实际界定要准确(真碰了).
+        # 碰撞判定: 真实物理接触 (base_link 与墙/障碍接触 = 真碰, 对齐 gazebo).
+        #    障碍物边缘+安全距离就判碰撞太严格 (有误差正常), 实际界定要准确(真碰了).
         #   激光阈值只用于奖励引导 (r_safe 惩罚贴墙), 不用于终止判定,
         #   这样"接近但没真碰"的局能继续跑完, 不会在边缘被误判终止.
         self._collision = self._is_collision() and self.step_count >= 50
         self._arrived = dist < self.GOAL_RADIUS
         out_of_bounds = (abs(pos[0]) > self.ROOM_HALF or abs(pos[1]) > self.ROOM_HALF)
 
-        # ★ 奖励 (按用户 5 条 cost 设计):
+        # 奖励 (按 5 条 cost 设计):
         #   1. 不直接"靠近目标"加分 (否则策略只冲目标忽略障碍) -> 用沿 A* 绕障路径的
         #      引导点接近 (r_waypoint, 权重低: 引导不主导, 靠近障碍惩罚必须更大)
         #   2. 远离雷达障碍加分, 但有上限 (2.0m 内越远越好, 再远不加分)
@@ -940,7 +940,7 @@ class End2EndNavEnv(gym.Env):
         r_waypoint = float(self._prev_wp_dist - wp_dist) * 8.0   # 1: 跟随绕障路径引导点 (低权重)
         r_action = abs(self.lin_vel) * 2.0 - abs(self.ang_vel)   # 前进激励 + 压大转角
         r_clear = min(float(min_laser), 2.0) / 2.0 * 0.3          # 2: 远离障碍加分, 2m 封顶
-        # ★ 贴障碍惩罚: 0.7m 梯度惩罚区, 越近二次陡增. 碰撞惩罚(-200) > 绕行收益,
+        # 贴障碍惩罚: 0.7m 梯度惩罚区, 越近二次陡增. 碰撞惩罚(-200) > 绕行收益,
         #   策略学"绕"而非"贴着障碍走/挤过去"
         SAFE = 0.5 + 2.0 * self.ROBOT_RADIUS   # 0.7 = 0.5 空隙 + 车直径 0.20
         pen = max(0.0, SAFE - min_laser)
@@ -958,7 +958,7 @@ class End2EndNavEnv(gym.Env):
             self._frames.append(self._render_gray() / 255.0)
         self.step_count += 1
 
-        # ★ 终止: 到达 或 碰撞 (撞墙即死, -100; 策略必须学会不撞/脱困)
+        # 终止: 到达 或 碰撞 (撞墙即死, -100; 策略必须学会不撞/脱困)
         terminated = bool(self._arrived or self._collision)
         truncated = self.step_count >= self.MAX_STEPS
         info = {"arrived": bool(self._arrived), "collided": bool(self._collision),
