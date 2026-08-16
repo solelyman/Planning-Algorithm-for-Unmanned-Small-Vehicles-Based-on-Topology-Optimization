@@ -96,7 +96,7 @@ install(DIRECTORY config launch
 
 install(PROGRAMS
   multi_ugv_planner/ugv_vprm_node.py
-  multi_ugv_planner/deploy_robot.py
+  multi_ugv_planner/vprm.py
   multi_ugv_planner/ugv_interfaces.py
   multi_ugv_planner/fake_odom.py
   multi_ugv_planner/fake_scan.py

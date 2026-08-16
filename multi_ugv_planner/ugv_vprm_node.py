@@ -3,7 +3,7 @@
 UGV 上车 V-PRM 节点: /scan + /odom -> VPRM.plan() -> /reference_path
 ====================================================================
 V-PRM 全局规划(世界坐标), 输出参考路径给 C++ unicycle MPC
-(ugv_planner_node_exe). 复用 deploy_robot.py 验证过的 VPRM 类 +
+(ugv_planner_node_exe). 复用 vprm.py 的 VPRM 类 +
 ugv_interfaces.py 的传感器转换.
 
 话题:
@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ugv_interfaces import (UGV, UGVState, odom_qos_profile,
                                 odom_to_state, scan_to_vprm_update_args,
                                 path_to_path_msg)
-from deploy_robot import VPRM
+from vprm import VPRM
 
 import rclpy
 from rclpy.node import Node

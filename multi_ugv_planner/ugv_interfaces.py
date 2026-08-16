@@ -21,7 +21,7 @@ UGV V-PRM + MPC 部署 —— 接口定义与传感器转换层
   MPC 求解器是 UGV 的 C++ AcadosContouringSolver (contouring_unicycle 模型:
   5 状态 [x,y,psi,v,s], 2 控制 [a,w]), 与 UGV 差速 unicycle 模型同构,
   控制量 a/w 直接对应 cmd_vel.linear.x / cmd_vel.angular.z.
-  V-PRM 用 deploy_robot.py 里验证过的 VPRM 类 (Python, 增量点图+净空加权)。
+  V-PRM 用 vprm.py 里的 VPRM 类 (Python, 增量点图+净空加权)。
 
 用法:
   python ugv_interfaces.py            # 自测: 合成数据验证全部转换函数
@@ -178,8 +178,8 @@ def scan_to_ellipsoids(msg, state: UGVState, radius: float = 0.35,
 
 def lidar_to_36(ranges, angle_min, angle_increment, fov_deg=360.0,
                 n_rays=36, ray_range=3.0):
-    """/scan → 36 束重采样 (RL 兼容接口, 每 10° 扇区取最小值)
-    保留自 deploy_robot.py, 供需要 36 维观测的模块复用."""
+    """/scan → 36 束重采样 (每 10° 扇区取最小值)
+    供需要 36 维观测的模块复用."""
     out = np.full(n_rays, ray_range, dtype=np.float32)
     for i in range(n_rays):
         ang_deg = i * (fov_deg / n_rays)
@@ -201,7 +201,7 @@ def lidar_to_36(ranges, angle_min, angle_increment, fov_deg=360.0,
 # =====================================================================
 
 def vprm_parameters() -> dict:
-    """V-PRM 参数 (真车调优值, 对齐 deploy_robot.py 验证过的配置)"""
+    """V-PRM 参数 (真车调优值)"""
     return dict(
         margin=0.5,       # 边净空阈值: 净空 < margin 的边断连 (窄缝过滤)
         n_samples=240,    # 每周期采样点数
