@@ -9,6 +9,8 @@ Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
 ![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python)
 ![acados](https://img.shields.io/badge/acados-v1.4-009688)
 ![V-PRM](https://img.shields.io/badge/Planner-V--PRM-orange)
+![PPO](https://img.shields.io/badge/RL-PPO-purple)
+![MuJoCo](https://img.shields.io/badge/Sim-MuJoCo-black)
 
 ---
 
@@ -20,6 +22,10 @@ A **model predictive control (MPC) path-tracking and obstacle-avoidance stack** 
 It couples a **V-PRM global planner** (with local-goal approach / arrival detection) with a
 real-time **contouring MPC** solved by **acados** (SQP-RTI + HPIPM). Two obstacle constraint
 formulations are implemented and switchable by one parameter:
+
+> **Two lines in one repo** — this repo contains **two competing navigation stacks**:
+> - `multi_usv_planner/` — classic **V-PRM + Contouring MPC** (model-based, ROS 2 / C++)
+> - [`RL/`](RL/README.md) — **end-to-end PPO** laser navigation (learning-based, MuJoCo, BC-pretrain + PPO finetune)
 
 | Test | Constraint formulation | `use_linear_constraints` | Remark |
 |------|------------------------|--------------------------|--------|
@@ -118,6 +124,13 @@ mpc:
 - **蠕行修复**：`acados_weight_velocity: 3.0`（速度跟踪主导）+ V-PRM `margin: 0.3`（绕行路径不过度外扩）。
 - **RTI_ITERATIONS=6**：2 次从低速度 warm start 收敛不到最优（会蠕行），6 次让非线性充分收敛。
 
+## 正在推进 / Roadmap
+
+- **RL 端到端（进行中）**：`RL/` 分支 —— 端到端 PPO 激光导航。
+  MuJoCo 仿真（SquareWorld2 布局 1:1 对齐，障碍放中央、起终点分居两侧强制绕行），
+  BC 预热（A\* 全局路径 + LOS 老师演示）→ PPO 微调，目标全部绕障局到达率 ≥ 0.7，
+  之后部署到真机与 V-PRM+MPC 路线对比。详见 [`RL/README.md`](RL/README.md)。
+
 ## Directory Layout / 目录结构
 
 ```
@@ -130,6 +143,15 @@ ugv_mpc_planner/
 ├── launch/ugv_mpc.launch.py      # V-PRM + MPC 一键启动
 ├── scripts/generate_contouring_solver.py  # 重新生成 acados 求解器
 └── multi_ugv_planner/                # Python: ugv_vprm_node.py, fake_odom.py, fake_scan.py
+RL/                                   # ★ RL 分支 (端到端 PPO 激光导航, MuJoCo)
+├── README.md                         # RL 模块说明 (奖励/训练管线/对照表)
+├── assets/ugv.xml                    # MuJoCo 车模 (两轮差速 + 90束激光)
+├── end2end_env.py                    # Gymnasium 环境 (激光观测 / 5条奖励 / A*老师 / LOS)
+├── vprm_planner.py                   # A* 网格全局路径
+├── collect_house_bc.py               # LOS 老师收集 BC 成功轨迹
+├── bc_pretrain.py                    # BC 预训练
+├── train_mj_ppo.py                   # PPO 微调 + 到达率评估
+└── requirements.txt                  # 依赖 (mujoco/gymnasium/torch/sb3)
 ```
 
 ## License
