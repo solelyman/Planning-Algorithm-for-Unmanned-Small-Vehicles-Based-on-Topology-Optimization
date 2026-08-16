@@ -1,0 +1,68 @@
+/**:
+  ros__parameters:
+    agent_id: 1
+
+    # 单体部署: 直接使用 MPC 第一预测步速度 (跳过 USV ILOS 控制器, 适配差速车)
+    use_direct_cmd: true
+    control_mode: mpc
+
+    goal:
+      x: 2.0
+      y: 0.0
+
+    # 静态障碍由 /scan 雷达回调动态注入 (scanCallback -> scan_obstacles_), 不用 yaml 数组
+    mpc:
+      N: 10
+      dt: 0.4
+      max_vel: 1.0
+      max_omega: 1.0
+      max_acc: 1.0
+      desired_speed: 1.0
+      max_iter: 5
+      weight_goal: 8.0
+      weight_path: 60.0
+      weight_obstacle: 15.0   # 软惩罚降级, 允许沿绕行路径正常走(不压死速度)
+      weight_smooth: 1.0
+      weight_speed: 7.0
+      weight_guidance: 50.0
+      guidance_margin: 0.8
+      weight_progress: 12.0
+      weight_backtrack: 48.0
+      min_progress_step: 0.15
+      weight_terminal_angle: 14.0
+      weight_terminal_contouring: 3.5
+      weight_seed_alignment: 4.0
+      weight_neighbor: 25.0
+      obstacle_clearance: 0.05  # 对齐mpc_planner-main: 椭球只留半径+车半径, 不用clearance加成
+      robot_radius: 0.2         # Fishbot 车体半径(原默认0.5是USV尺度, 会让椭球直径1.4m盖住绕行路径)
+      use_linear_constraints: true   # 硬线性半空间约束(mpc_planner LinearizedConstraints), 开启时软椭球罚置0
+      warmstart_with_previous: true  # warm start 用上一帧解shift+投影, 避免HPIPM从不可行点出发MINSTEP
+      dynamic_obstacle_growth: 0.25
+      acados_weight_acc: 0.25
+      acados_weight_angvel: 0.50
+      acados_weight_velocity: 3.0    # 速度跟踪主导, 否则 MPC 觉得"原地不动"代价更低(蠕行)
+      acados_weight_contour: 0.05
+      acados_weight_lag: 0.10
+      acados_weight_terminal_angle: 100.0
+      acados_weight_terminal_contouring: 10.0
+      acados_max_obstacles: 8
+
+    controller:
+      m11: 28.0
+      m22: 28.0
+      Izz: 10.0
+      d_u: -16.45
+      d_r: -6.0
+      lookahead_h: 8.0
+      k_x: 2.0
+      k_u: 5.0
+      k_psi: 1.0
+      k_y: 0.5
+      k_r: 5.0
+      max_u: 2.0
+      max_r: 1.0
+      filter_omega_n: 2.2
+      filter_zeta: 0.85
+      stop_radius: 0.35
+
+    pass_x_threshold: 90.0
