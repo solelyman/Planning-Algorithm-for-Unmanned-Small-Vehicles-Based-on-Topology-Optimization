@@ -9,6 +9,8 @@ Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
 ![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python)
 ![acados](https://img.shields.io/badge/acados-v1.4-009688)
 ![V-PRM](https://img.shields.io/badge/Planner-V--PRM-orange)
+![PPO](https://img.shields.io/badge/RL-PPO-purple)
+![MuJoCo](https://img.shields.io/badge/Sim-MuJoCo-black)
 
 ---
 
@@ -20,6 +22,10 @@ A **model predictive control (MPC) path-tracking and obstacle-avoidance stack** 
 It couples a **V-PRM global planner** (with local-goal approach / arrival detection) with a
 real-time **contouring MPC** solved by **acados** (SQP-RTI + HPIPM). Two obstacle constraint
 formulations are implemented and switchable by one parameter:
+
+> **Two lines in one repo** — this repo contains **two competing navigation stacks**:
+> - `multi_usv_planner/` — classic **V-PRM + Contouring MPC** (model-based, ROS 2 / C++)
+> - [`fishbot_rl/`](fishbot_rl/README.md) — **end-to-end PPO** laser navigation (learning-based, MuJoCo, BC-pretrain + PPO finetune)
 
 | Test | Constraint formulation | `use_linear_constraints` | Remark |
 |------|------------------------|--------------------------|--------|

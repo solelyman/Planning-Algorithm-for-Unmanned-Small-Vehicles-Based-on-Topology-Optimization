@@ -1,0 +1,123 @@
+<mujoco model="fishbot">
+  <compiler angle="degree" coordinate="local" meshdir="none"/>
+  <option timestep="0.02" gravity="0 0 -9.81">
+    <flag contact="enable"/>
+  </option>
+  <default>
+    <geom type="cylinder" condim="3" friction="1.0 0.005 0.0001"/>
+    <joint type="hinge" damping="0.1" armature="0.005"/>
+  </default>
+  <worldbody>
+    <!-- 全局光源: 增强环境光保证 GUI/渲染不黑 (黑屏主因=环境光不足) -->
+    <light pos="0 0 12" dir="0 0 -1" diffuse="0.95 0.95 0.95" ambient="0.75 0.75 0.75" castshadow="true"/>
+    <light pos="-12 0 6" dir="1 0 -0.3" diffuse="0.5 0.5 0.5" ambient="0.35 0.35 0.35"/>
+    <light pos="12 0 6" dir="-1 0 -0.3" diffuse="0.5 0.5 0.5" ambient="0.35 0.35 0.35"/>
+    <light pos="0 12 4" dir="0 -1 -0.3" diffuse="0.45 0.45 0.45" ambient="0.3 0.3 0.3"/>
+    <!-- 固定俯视相机 (GUI/渲染用: 从上方 45° 看全场景, 视角明确不黑) -->
+    <camera name="top_view" pos="0 0 13" quat="0.924 0.383 0 0" mode="fixed"/>
+    <!-- 地面 -->
+    <geom name="ground" type="plane" size="10 10 0.1" rgba="0.3 0.5 0.3 1" friction="1.0"/>
+    <!-- 目标标记: 金色球, reset 时动态更新位置 (纯可视化, 不参与碰撞/激光) -->
+    <geom name="goal_marker" type="sphere" size="0.18" pos="0 0 0.4" rgba="1.0 0.85 0.0 1" contype="0" conaffinity="0"/>
+    <!-- ===== 边界墙 (实体, 与 gazebo SquareWorld2 对齐 ±5.425m; 四角重叠无缝隙) ===== -->
+    <geom name="wall_n" type="box" size="5.5 0.15 0.3" pos="0 5.425 0.3" rgba="0.6 0.6 0.6 1" friction="0.9"/>
+    <geom name="wall_s" type="box" size="5.5 0.15 0.3" pos="0 -5.425 0.3" rgba="0.6 0.6 0.6 1" friction="0.9"/>
+    <geom name="wall_e" type="box" size="0.15 5.5 0.3" pos="5.425 0 0.3" rgba="0.6 0.6 0.6 1" friction="0.9"/>
+    <geom name="wall_w" type="box" size="0.15 5.5 0.3" pos="-5.425 0 0.3" rgba="0.6 0.6 0.6 1" friction="0.9"/>
+
+    <!-- ===== 障碍物 (每个包一层静态 body: 位置/旋转用 body_pos/body_quat 动态改 (mujoco 3.11 中
+         geom_quat 运行时赋值不生效, body_quat 生效); geom 尺寸/颜色/contype 动态改) ===== -->
+    <body name="obsb_0" pos="30 30 0.3"><geom name="obs_0" type="box" size="0.2 0.2 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_1" pos="30 30 0.3"><geom name="obs_1" type="box" size="0.25 0.15 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_2" pos="30 30 0.3"><geom name="obs_2" type="box" size="0.15 0.25 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_3" pos="30 30 0.3"><geom name="obs_3" type="box" size="0.2 0.2 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_4" pos="30 30 0.3"><geom name="obs_4" type="box" size="0.2 0.2 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_5" pos="30 30 0.3"><geom name="obs_5" type="box" size="0.25 0.2 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_6" pos="30 30 0.3"><geom name="obs_6" type="box" size="0.2 0.25 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_7" pos="30 30 0.3"><geom name="obs_7" type="box" size="0.2 0.2 0.3" rgba="0.9 0.6 0.2 1" friction="0.8"/></body>
+    <body name="obsb_8" pos="30 30 0.3"><geom name="obs_8" type="box" size="0.5 0.08 0.3" rgba="0.7 0.7 0.7 1" friction="0.8"/></body>
+    <body name="obsb_9" pos="30 30 0.3"><geom name="obs_9" type="box" size="0.5 0.08 0.3" rgba="0.7 0.7 0.7 1" friction="0.8"/></body>
+    <body name="obsb_10" pos="30 30 0.3"><geom name="obs_10" type="box" size="0.5 0.08 0.3" rgba="0.7 0.7 0.7 1" friction="0.8"/></body>
+    <body name="obsb_11" pos="30 30 0.3"><geom name="obs_11" type="box" size="0.5 0.08 0.3" rgba="0.7 0.7 0.7 1" friction="0.8"/></body>
+    <body name="obsb_12" pos="30 30 0.3"><geom name="obs_12" type="box" size="0.35 0.08 0.3" rgba="0.7 0.7 0.7 1" friction="0.8"/></body>
+    <body name="obsb_13" pos="30 30 0.3"><geom name="obs_13" type="box" size="0.35 0.08 0.3" rgba="0.7 0.7 0.7 1" friction="0.8"/></body>
+    <body name="obsb_14" pos="30 30 0.3"><geom name="obs_14" type="box" size="0.25 0.25 0.3" rgba="0.8 0.5 0.3 1" friction="0.8"/></body>
+    <body name="obsb_15" pos="30 30 0.3"><geom name="obs_15" type="box" size="0.22 0.15 0.3" rgba="0.8 0.5 0.3 1" friction="0.8"/></body>
+    <body name="obsb_16" pos="30 30 0.3"><geom name="obs_16" type="box" size="0.02 0.02 0.5" rgba="0.25 0.25 0.25 1" friction="0.8"/></body>
+    <body name="obsb_17" pos="30 30 0.3"><geom name="obs_17" type="box" size="0.02 0.02 0.5" rgba="0.25 0.25 0.25 1" friction="0.8"/></body>
+    <body name="obsb_18" pos="30 30 1.0"><geom name="obs_18" type="box" size="0.75 0.4 0.03" rgba="0.45 0.4 0.3 1" friction="0.8" contype="0" conaffinity="0"/></body>
+
+    <!-- ===== UGV 底盘 (URDF: 半径0.10 高0.12, 装高0.076) ===== -->
+    <body name="chassis" pos="0 0 0.076">
+      <freejoint name="root"/>
+      <geom name="base_link" type="cylinder" size="0.10 0.06" mass="1.8" rgba="0.1 0.1 1.0 0.8" friction="0.8"/>
+      <!-- 激光雷达 (装高 +0.075) -->
+      <geom name="laser" type="cylinder" size="0.02 0.01" pos="0 0 0.075" mass="0.02" rgba="0.0 0.0 0.0 0.5" friction="0.5"/>
+      <!-- 左轮 (轮径6.5cm, 轮距~16cm) -->
+      <body name="wheel_l" pos="0 -0.08 0">
+        <joint name="wheel_l_joint" axis="0 1 0"/>
+        <geom name="wheel_l_geom" type="cylinder" size="0.0325 0.02" mass="0.08" rgba="0.1 0.1 0.1 1" friction="1.2"/>
+      </body>
+      <!-- 右轮 -->
+      <body name="wheel_r" pos="0 0.08 0">
+        <joint name="wheel_r_joint" axis="0 1 0"/>
+        <geom name="wheel_r_geom" type="cylinder" size="0.0325 0.02" mass="0.08" rgba="0.1 0.1 0.1 1" friction="1.2"/>
+      </body>
+      <!-- 鱼眼摄像头 (lidar 前方 0.12m, 同高 0.075 世界高=0.151, 对齐真车 OV3660@ESP32S3) -->
+      <camera name="fisheye" pos="0.12 0 0.075" mode="fixed" zaxis="1 0 0"/>
+      <!-- 后支撑轮 -->
+      <body name="caster" pos="-0.07 0 -0.052">
+        <geom name="caster_geom" type="sphere" size="0.015" mass="0.01" rgba="0.5 0.5 0.5 1" friction="0.5"/>
+      </body>
+    </body>
+
+    <!-- ===== 仅可视化 geom (contype=0 不参与碰撞, view.py 更新位置) ===== -->
+    <geom name="guide" type="sphere" size="0.06" pos="50 50 0.03" rgba="0.0 1.0 1.0 0.9" contype="0" conaffinity="0"/>
+    <geom name="path_0" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_1" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_2" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_3" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_4" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_5" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_6" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_7" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_8" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="path_9" type="sphere" size="0.04" pos="50 50 0.02" rgba="0.0 1.0 0.0 0.8" contype="0" conaffinity="0"/>
+    <geom name="ray_0" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_1" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_2" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_3" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_4" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_5" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_6" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_7" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_8" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_9" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_10" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_11" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_12" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_13" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_14" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_15" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_16" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_17" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_18" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_19" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_20" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_21" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_22" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_23" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_24" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_25" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_26" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_27" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_28" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_29" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_30" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_31" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_32" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_33" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_34" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+    <geom name="ray_35" type="cylinder" size="0.004 0.01" pos="50 50 0.02" rgba="1.0 0.3 0.0 0.5" contype="0" conaffinity="0"/>
+  </worldbody>
+</mujoco>
