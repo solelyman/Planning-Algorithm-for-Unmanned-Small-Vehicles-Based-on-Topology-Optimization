@@ -1,7 +1,7 @@
 # 基于拓扑优化的无人小型车辆规划算法 · Contouring MPC
 
 Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
-（Fishbot 两轮差速小车 · MPC 路径跟踪与避障）
+（UGV 两轮差速小车 · MPC 路径跟踪与避障）
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 ![ROS 2](https://img.shields.io/badge/ROS_2-Humble-blue)
@@ -15,7 +15,7 @@ Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
 > **English** | 中文见下（English README, Chinese below）
 
 A **model predictive control (MPC) path-tracking and obstacle-avoidance stack** for the
-**Fishbot** two-wheel differential-drive robot (ESP32 + YDLidar X2), running on ROS 2 Humble.
+**UGV** two-wheel differential-drive robot (ESP32 + YDLidar X2), running on ROS 2 Humble.
 
 It couples a **V-PRM global planner** (with local-goal approach / arrival detection) with a
 real-time **contouring MPC** solved by **acados** (SQP-RTI + HPIPM). Two obstacle constraint
@@ -32,7 +32,7 @@ Both tests are validated to **circle around an obstacle, run the approach straig
 
 ## 中文简介
 
-为 **Fishbot 两轮差速小车**（ESP32 主控 + YDLidar X2 激光雷达，ROS 2 Humble / micro-ROS）实现的
+为 **UGV 两轮差速小车**（ESP32 主控 + YDLidar X2 激光雷达，ROS 2 Humble / micro-ROS）实现的
 **MPC 路径跟踪与避障**完整链路：
 
 - **V-PRM 全局规划**：基于雷达点云在线构建 PRM 绕行路径，带 0.35 m 障碍安全余量；
@@ -56,10 +56,10 @@ Both tests are validated to **circle around an obstacle, run the approach straig
 
 ```
  /scan ──┐
- /odom ──┼──▶ fishbot_vprm_node.py ──▶ /reference_path ──┐
+ /odom ──┼──▶ ugv_vprm_node.py ──▶ /reference_path ──┐
          │      (V-PRM global plan,                    │
          │       approach & arrival)                   ▼
- /odom ──┼──────────────────────────────────▶ usv_planner_node_exe (Contouring MPC)
+ /odom ──┼──────────────────────────────────▶ ugv_planner_node_exe (Contouring MPC)
          │                                          │  acados SQP-RTI
  /scan ──┘  ──▶ scan_obstacles_ (ellipsoid/        │  NH=12 half-spaces or
                     half-space obstacles)           ▼  N_ELL=12 soft ellipsoids
@@ -77,32 +77,32 @@ Both tests are validated to **circle around an obstacle, run the approach straig
 ```bash
 # 1. Build (colcon)
 cd <your_ws>/src
-cp -r fishbot_mpc_planner multi_usv_planner
+cp -r ugv_mpc_planner multi_ugv_planner
 cd <your_ws>
 source /opt/ros/humble/setup.bash
-colcon build --packages-select multi_usv_planner
+colcon build --packages-select multi_ugv_planner
 
 # 2. Simulation with fake odom/scan (no hardware)
 source install/setup.bash
-ros2 run multi_usv_planner fake_odom.py &   # integrate /cmd_vel -> /odom at 50 Hz
-ros2 run multi_usv_planner fake_scan.py &   # fixed obstacle at (1.0, 0.0) r=0.15
-ros2 launch multi_usv_planner fishbot_mpc.launch.py
+ros2 run multi_ugv_planner fake_odom.py &   # integrate /cmd_vel -> /odom at 50 Hz
+ros2 run multi_ugv_planner fake_scan.py &   # fixed obstacle at (1.0, 0.0) r=0.15
+ros2 launch multi_ugv_planner ugv_mpc.launch.py
 ```
 
-> `fishbot_mpc.launch.py` starts the V-PRM node and the MPC node with
-> `config/usv_params_fishbot.yaml`. It references `scripts/fishbot_vprm_node.py`
-> (in this repo under `multi_usv_planner/`).
+> `ugv_mpc.launch.py` starts the V-PRM node and the MPC node with
+> `config/ugv_params.yaml`. It references `scripts/ugv_vprm_node.py`
+> (in this repo under `multi_ugv_planner/`).
 
 ### Test A vs Test B / A/B 测试切换
 
-Edit `config/usv_params_fishbot.yaml`:
+Edit `config/ugv_params.yaml`:
 
 ```yaml
 mpc:
   use_linear_constraints: true    # false -> Test A (soft ellipsoid), true -> Test B (hard linearized)
 ```
 
-### Real robot / 真机（Fishbot）
+### Real robot / 真机（UGV）
 
 - 上位机通过 UDP 8888 连接 micro-ROS Agent（Humble 固件版本必须匹配）；
 - 雷达通过 TCP 8889 转发到 `/scan`；
@@ -121,15 +121,15 @@ mpc:
 ## Directory Layout / 目录结构
 
 ```
-fishbot_mpc_planner/
+ugv_mpc_planner/
 ├── CMakeLists.txt / package.xml       # ROS 2 ament 包
-├── include/multi_usv_planner/        # 头文件 (solver, constraint builder, types…)
-├── src/                              # usv_planner_node.cpp (主节点), acados_contouring_solver.cpp…
+├── include/multi_ugv_planner/        # 头文件 (solver, constraint builder, types…)
+├── src/                              # ugv_planner_node.cpp (主节点), acados_contouring_solver.cpp…
 ├── acados/generated/contouring_solver/  # 生成的 acados 求解器 (contouring_unicycle, NH=12, NP=126)
-├── config/usv_params_fishbot.yaml    # 参数 (Test A/B 切换)
-├── launch/fishbot_mpc.launch.py      # V-PRM + MPC 一键启动
+├── config/ugv_params.yaml    # 参数 (Test A/B 切换)
+├── launch/ugv_mpc.launch.py      # V-PRM + MPC 一键启动
 ├── scripts/generate_contouring_solver.py  # 重新生成 acados 求解器
-└── multi_usv_planner/                # Python: fishbot_vprm_node.py, fake_odom.py, fake_scan.py
+└── multi_ugv_planner/                # Python: ugv_vprm_node.py, fake_odom.py, fake_scan.py
 ```
 
 ## License

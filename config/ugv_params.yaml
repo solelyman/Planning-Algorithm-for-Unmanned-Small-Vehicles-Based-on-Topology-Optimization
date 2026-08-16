@@ -2,7 +2,7 @@
   ros__parameters:
     agent_id: 1
 
-    # 单体部署: 直接使用 MPC 第一预测步速度 (跳过 USV ILOS 控制器, 适配差速车)
+    # 单体部署: 直接使用 MPC 第一预测步速度 (跳过 UGV ILOS 控制器, 适配差速车)
     use_direct_cmd: true
     control_mode: mpc
 
@@ -34,7 +34,7 @@
       weight_seed_alignment: 4.0
       weight_neighbor: 25.0
       obstacle_clearance: 0.05  # 对齐mpc_planner-main: 椭球只留半径+车半径, 不用clearance加成
-      robot_radius: 0.2         # Fishbot 车体半径(原默认0.5是USV尺度, 会让椭球直径1.4m盖住绕行路径)
+      robot_radius: 0.2         # UGV 车体半径(原默认0.5是UGV尺度, 会让椭球直径1.4m盖住绕行路径)
       use_linear_constraints: true   # 硬线性半空间约束(mpc_planner LinearizedConstraints), 开启时软椭球罚置0
       warmstart_with_previous: true  # warm start 用上一帧解shift+投影, 避免HPIPM从不可行点出发MINSTEP
       dynamic_obstacle_growth: 0.25

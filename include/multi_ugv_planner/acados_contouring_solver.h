@@ -1,8 +1,8 @@
-#ifndef MULTI_USV_ACADOS_CONTOURING_SOLVER_H
-#define MULTI_USV_ACADOS_CONTOURING_SOLVER_H
+#ifndef MULTI_UGV_ACADOS_CONTOURING_SOLVER_H
+#define MULTI_UGV_ACADOS_CONTOURING_SOLVER_H
 
-#include <multi_usv_planner/types.h>
-#include <multi_usv_planner/mpc_solver.h>
+#include <multi_ugv_planner/types.h>
+#include <multi_ugv_planner/mpc_solver.h>
 #include <string>
 #include <vector>
 
@@ -15,7 +15,7 @@ struct ocp_nlp_dims;
 /* 新版生成 API 的胶囊类型 (带 model-hash 前缀), 旧名仅为兼容 */
 typedef struct ocp_contouring_unicycle_1f1aa62f_solver_capsule contouring_unicycle_solver_capsule;
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 /// An ellipsoid (circle) constraint: (x-ox)² + (y-oy)² - r² <= 0
@@ -66,7 +66,7 @@ public:
 
         double weight_obstacle          = 500.0;
 
-        double robot_radius = 0.2;   // Fishbot 小车车体半径, 椭球半径 = obs.r + robot_radius + clearance
+        double robot_radius = 0.2;   // UGV 小车车体半径, 椭球半径 = obs.r + robot_radius + clearance
         double obstacle_clearance = 3.0;
         bool use_linear_constraints = true;  // 硬线性半空间约束 (mpc_planner 式), 开启时软椭球罚权重置 0
         bool warmstart_with_previous = false;
@@ -84,7 +84,7 @@ public:
     const std::string &statusMessage() const { return status_message_; }
 
     /** Solve OCP with path tracking cost + ellipsoid soft penalty for dynamic obstacles. */
-    Trajectory solve(const USVState &state,
+    Trajectory solve(const UGVState &state,
                      const ReferencePath &ref_path,
                      const StageConstraintSet &stage_constraints);
 
@@ -116,6 +116,6 @@ private:
     bool has_prev_trajectory_ = false;
 };
 
-} // namespace MultiUSV
+} // namespace MultiUGV
 
 #endif

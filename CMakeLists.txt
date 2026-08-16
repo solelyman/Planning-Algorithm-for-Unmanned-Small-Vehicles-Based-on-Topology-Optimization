@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(multi_usv_planner)
+project(multi_ugv_planner)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -60,13 +60,13 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # ── Executable (Node) ──────────────────────────────
-add_executable(usv_planner_node_exe src/usv_planner_node.cpp)
-target_compile_features(usv_planner_node_exe PUBLIC cxx_std_17)
-target_include_directories(usv_planner_node_exe PUBLIC
+add_executable(ugv_planner_node_exe src/ugv_planner_node.cpp)
+target_compile_features(ugv_planner_node_exe PUBLIC cxx_std_17)
+target_include_directories(ugv_planner_node_exe PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(usv_planner_node_exe
+ament_target_dependencies(ugv_planner_node_exe
   rclcpp
   nav_msgs
   geometry_msgs
@@ -75,12 +75,12 @@ ament_target_dependencies(usv_planner_node_exe
   tf2
   tf2_geometry_msgs
 )
-target_link_libraries(usv_planner_node_exe
+target_link_libraries(ugv_planner_node_exe
   ${PROJECT_NAME}
   Eigen3::Eigen
 )
 
-install(TARGETS ${PROJECT_NAME} usv_planner_node_exe
+install(TARGETS ${PROJECT_NAME} ugv_planner_node_exe
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -95,9 +95,11 @@ install(DIRECTORY config launch
 )
 
 install(PROGRAMS
-  multi_usv_planner/fishbot_vprm_node.py
-  multi_usv_planner/fake_odom.py
-  multi_usv_planner/fake_scan.py
+  multi_ugv_planner/ugv_vprm_node.py
+  multi_ugv_planner/deploy_robot.py
+  multi_ugv_planner/ugv_interfaces.py
+  multi_ugv_planner/fake_odom.py
+  multi_ugv_planner/fake_scan.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

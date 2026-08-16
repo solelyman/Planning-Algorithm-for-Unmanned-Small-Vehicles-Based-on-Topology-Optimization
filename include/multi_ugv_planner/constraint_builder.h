@@ -1,8 +1,8 @@
-#ifndef MULTI_USV_CONSTRAINT_BUILDER_H
-#define MULTI_USV_CONSTRAINT_BUILDER_H
+#ifndef MULTI_UGV_CONSTRAINT_BUILDER_H
+#define MULTI_UGV_CONSTRAINT_BUILDER_H
 
-#include <multi_usv_planner/types.h>
-#include <multi_usv_planner/acados_contouring_solver.h>
+#include <multi_ugv_planner/types.h>
+#include <multi_ugv_planner/acados_contouring_solver.h>
 
 #include <Eigen/Dense>
 #include <vector>
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 /**
@@ -28,7 +28,7 @@ class ConstraintBuilder
 public:
     StageConstraintSet build(
         const ReferencePath &contour_ref,
-        const USVState &ego,
+        const UGVState &ego,
         const std::vector<Obstacle> &static_obstacles,
         double robot_radius,
         double obstacle_clearance,
@@ -38,6 +38,6 @@ public:
         double corridor_y_max = 18.0);
 };
 
-}  // namespace MultiUSV
+}  // namespace MultiUGV
 
-#endif  // MULTI_USV_CONSTRAINT_BUILDER_H
+#endif  // MULTI_UGV_CONSTRAINT_BUILDER_H

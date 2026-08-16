@@ -1,13 +1,13 @@
-#include <multi_usv_planner/controller.h>
+#include <multi_ugv_planner/controller.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
-std::pair<double, double> USVController::compute(const Trajectory &traj,
-                                                  const USVState &state, double dt)
+std::pair<double, double> UGVController::compute(const Trajectory &traj,
+                                                  const UGVState &state, double dt)
 {
     if (traj.size() == 0) return {0.0, 0.0};
 
@@ -76,4 +76,4 @@ std::pair<double, double> USVController::compute(const Trajectory &traj,
     return {u_des, r_cmd};
 }
 
-} // namespace MultiUSV
+} // namespace MultiUGV

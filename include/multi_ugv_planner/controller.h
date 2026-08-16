@@ -1,10 +1,10 @@
-#ifndef MULTI_USV_CONTROLLER_H
-#define MULTI_USV_CONTROLLER_H
+#ifndef MULTI_UGV_CONTROLLER_H
+#define MULTI_UGV_CONTROLLER_H
 
-#include <multi_usv_planner/types.h>
+#include <multi_ugv_planner/types.h>
 #include <utility>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 class CommandFilter
@@ -36,7 +36,7 @@ private:
     double omega_n_, zeta_n_, limit_, x1_, x2_;
 };
 
-class USVController
+class UGVController
 {
 public:
     struct Params
@@ -59,7 +59,7 @@ public:
         double stop_radius = 2.0;
     };
 
-    USVController() = default;
+    UGVController() = default;
 
     void setParams(const Params &p)
     {
@@ -76,7 +76,7 @@ public:
     }
 
     std::pair<double, double> compute(const Trajectory &traj,
-                                      const USVState &state, double dt);
+                                      const UGVState &state, double dt);
 
 private:
     Params p_;
@@ -86,6 +86,6 @@ private:
     double ff_alpha_ = 0.45;
 };
 
-} // namespace MultiUSV
+} // namespace MultiUGV
 
 #endif

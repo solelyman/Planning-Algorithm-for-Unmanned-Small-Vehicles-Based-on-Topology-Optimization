@@ -1,4 +1,4 @@
-#include <multi_usv_planner/usv_planner.h>
+#include <multi_ugv_planner/ugv_planner.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -18,7 +18,7 @@
 #include <cstdlib>
 
 using namespace std::chrono_literals;
-using namespace MultiUSV;
+using namespace MultiUGV;
 
 double accumulatePathLength(const ReferencePath &path)
 {
@@ -41,8 +41,8 @@ double dynamicSlowClearance(double obstacle_clearance)
     return std::max(obstacle_clearance + 3.8, 7.8);
 }
 
-USVPlanner::USVPlanner()
-    : Node("usv_planner_node")
+UGVPlanner::UGVPlanner()
+    : Node("ugv_planner_node")
 {
     declareParams();
     loadParams();
@@ -68,14 +68,14 @@ USVPlanner::USVPlanner()
         acados_solver_.setParams(ap);
         bool acados_ok = acados_solver_.initialize();
         if (acados_ok)
-            RCLCPP_INFO(this->get_logger(), "USV-%d acados contouring solver ready (5-state, EXTERNAL+EXACT+MIRROR, ellipsoid soft penalty[N_ELL=%d])", agent_id_, AcadosContouringSolver::N_ELLIPSOIDS);
+            RCLCPP_INFO(this->get_logger(), "UGV-%d acados contouring solver ready (5-state, EXTERNAL+EXACT+MIRROR, ellipsoid soft penalty[N_ELL=%d])", agent_id_, AcadosContouringSolver::N_ELLIPSOIDS);
         else
-            RCLCPP_WARN(this->get_logger(), "USV-%d acados init failed: %s",
+            RCLCPP_WARN(this->get_logger(), "UGV-%d acados init failed: %s",
                         agent_id_, acados_solver_.statusMessage().c_str());
     }
 
     RCLCPP_INFO(this->get_logger(),
-        "USV-%d 启动 | MPC N=%d | CTRL=%s | ILOS lh=%.1f",
+        "UGV-%d 启动 | MPC N=%d | CTRL=%s | ILOS lh=%.1f",
         agent_id_,
         mpc_solver_.params().N,
         control_mode_.c_str(),
@@ -84,7 +84,7 @@ USVPlanner::USVPlanner()
 
 #define P_(name, val) this->declare_parameter(#name, val)
 
-void USVPlanner::declareParams()
+void UGVPlanner::declareParams()
 {
     P_(agent_id, 1);
     P_(goal.x, 120.0);    P_(goal.y, 30.0);
@@ -126,12 +126,12 @@ void USVPlanner::declareParams()
 
 #undef P_
 
-void USVPlanner::loadParams()
+void UGVPlanner::loadParams()
 {
     agent_id_ = this->get_parameter("agent_id").as_int();
 
-    // CSV log
-    std::string csv_path = "/home/lu/paper2/core_ws/log_usv_" + std::to_string(agent_id_) + ".csv";
+    // CSV log (写入当前工作目录)
+    std::string csv_path = "log_ugv_" + std::to_string(agent_id_) + ".csv";
     csv_out_.open(csv_path);
     csv_out_ << "t,x,y,psi,u,v,r,desired_speed,dist_to_goal,nearest_obs,cmd_u,cmd_r\n";
     csv_initialized_ = true;
@@ -190,7 +190,7 @@ void USVPlanner::loadParams()
 
     // Controller
     {
-        USVController::Params cp;
+        UGVController::Params cp;
         cp.m11 = load_double("controller.m11");
         cp.m22 = load_double("controller.m22");
         cp.Izz = load_double("controller.Izz");
@@ -213,11 +213,11 @@ void USVPlanner::loadParams()
     }
 }
 
-void USVPlanner::initCommunication()
+void UGVPlanner::initCommunication()
 {
     const auto latched_qos = rclcpp::QoS(rclcpp::KeepLast(1)).reliable().transient_local();
     sub_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
-        "odom", rclcpp::QoS(10).best_effort(),   // Fishbot 固件 /odom 为 BEST_EFFORT
+        "odom", rclcpp::QoS(10).best_effort(),   // UGV 固件 /odom 为 BEST_EFFORT
         [this](const nav_msgs::msg::Odometry::SharedPtr m) { odomCallback(m); });
 
     sub_path_ = this->create_subscription<nav_msgs::msg::Path>(
@@ -228,7 +228,7 @@ void USVPlanner::initCommunication()
         "final_goal", 10,
         [this](const geometry_msgs::msg::Point::SharedPtr m) { goalCallback(m); });
 
-    // Fishbot 雷达: /scan (RELIABLE) -> 世界坐标障碍, 注入 MPC 约束
+    // UGV 雷达: /scan (RELIABLE) -> 世界坐标障碍, 注入 MPC 约束
     sub_scan_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan", rclcpp::QoS(10).reliable(),
         [this](const sensor_msgs::msg::LaserScan::SharedPtr m) { scanCallback(m); });
@@ -240,7 +240,7 @@ void USVPlanner::initCommunication()
     // Visualization
     pub_viz_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
         "trajectory_markers", 10);
-    const std::string ns_prefix = "/usv_" + std::to_string(agent_id_);
+    const std::string ns_prefix = "/ugv_" + std::to_string(agent_id_);
     pub_planned_traj_alias_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
         ns_prefix + "/planned_trajectory", 10);
     pub_contouring_alias_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
@@ -255,10 +255,10 @@ void USVPlanner::initCommunication()
         ns_prefix + "/goal_module", 10);
 
     timer_ = this->create_wall_timer(100ms, [this]() { controlLoop(); });
-    RCLCPP_INFO(this->get_logger(), "USV-%d control loop: 10 Hz", agent_id_);
+    RCLCPP_INFO(this->get_logger(), "UGV-%d control loop: 10 Hz", agent_id_);
 }
 
-void USVPlanner::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+void UGVPlanner::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
     if (!ego_.received)
         return;
@@ -292,7 +292,7 @@ void USVPlanner::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
     scan_obstacles_ = std::move(obs);
 }
 
-void USVPlanner::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
+void UGVPlanner::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
     ego_.x = msg->pose.pose.position.x;
     ego_.y = msg->pose.pose.position.y;
@@ -323,7 +323,7 @@ void USVPlanner::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
             episode_start_time_ = this->now();
             metrics_initialized_ = true;
             RCLCPP_WARN(this->get_logger(),
-                "USV-%d episode reset (was done but still far from goal, dist=%.1f)",
+                "UGV-%d episode reset (was done but still far from goal, dist=%.1f)",
                 agent_id_, dist_to_goal);
             reset_guard_until_ = this->now() + rclcpp::Duration::from_seconds(20.0);
             near_goal_cooldown_ = 200;
@@ -338,7 +338,7 @@ void USVPlanner::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
         double dist2goal = std::sqrt(dxg * dxg + dyg * dyg);
         if (ego_.x > pass_x_threshold_ || dist2goal < 0.35) {   // 单体: 接近到达才停 (原 40m 为仿真出生判定)
             RCLCPP_WARN(this->get_logger(),
-                "USV-%d spawn past threshold (x=%.1f, dist2goal=%.1f), skipping",
+                "UGV-%d spawn past threshold (x=%.1f, dist2goal=%.1f), skipping",
                 agent_id_, ego_.x, dist2goal);
             first_run_ = false;
             metrics_written_ = true;
@@ -351,14 +351,14 @@ void USVPlanner::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
         near_goal_cooldown_ = 200;
         metrics_initialized_ = true;
         RCLCPP_INFO(this->get_logger(),
-            "USV-%d 初始: [%.2f, %.2f, %.1f°] cooldown=%d",
+            "UGV-%d 初始: [%.2f, %.2f, %.1f°] cooldown=%d",
             agent_id_, ego_.x, ego_.y, ego_.psi * 180.0 / M_PI, near_goal_cooldown_);
         first_run_ = false;
         return;
     }
 }
 
-void USVPlanner::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
+void UGVPlanner::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
 {
     ReferencePath received_path;
     for (const auto &pose : msg->poses)
@@ -373,7 +373,7 @@ void USVPlanner::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
         smooth_ref_path_ = std::move(received_path);
         selected_reference_active_ = true;
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
-            "USV-%d received reference_path with %zu poses", agent_id_, msg->poses.size());
+            "UGV-%d received reference_path with %zu poses", agent_id_, msg->poses.size());
     }
     else
     {
@@ -382,9 +382,9 @@ void USVPlanner::pathCallback(const nav_msgs::msg::Path::SharedPtr msg)
     }
 }
 
-void USVPlanner::goalCallback(const geometry_msgs::msg::Point::SharedPtr msg)
+void UGVPlanner::goalCallback(const geometry_msgs::msg::Point::SharedPtr msg)
 {
-    // 单体 Fishbot: 收到 /final_goal 即重置 episode (nav2 风格, 点相同 goal 也重导航).
+    // 单体 UGV: 收到 /final_goal 即重置 episode (nav2 风格, 点相同 goal 也重导航).
     // 必须无条件重置: episode 超时后 metrics_written_=1 会永久空转, 同 goal 不再触发.
     if (has_goal_)
     {
@@ -398,16 +398,16 @@ void USVPlanner::goalCallback(const geometry_msgs::msg::Point::SharedPtr msg)
         last_progress_dist_to_goal_ = std::numeric_limits<double>::max();
         near_goal_cooldown_ = 50;   // 5s 防抖, 避免刚重置就误判到达
         reset_guard_until_ = this->now() + rclcpp::Duration::from_seconds(3.0);
-        RCLCPP_INFO(this->get_logger(), "USV-%d 新目标, episode 已重置: [%.1f, %.1f]",
+        RCLCPP_INFO(this->get_logger(), "UGV-%d 新目标, episode 已重置: [%.1f, %.1f]",
                     agent_id_, msg->x, msg->y);
     }
     goal_x_ = msg->x;
     goal_y_ = msg->y;
     has_goal_ = true;
-    RCLCPP_INFO(this->get_logger(), "USV-%d 目标: [%.1f, %.1f]", agent_id_, goal_x_, goal_y_);
+    RCLCPP_INFO(this->get_logger(), "UGV-%d 目标: [%.1f, %.1f]", agent_id_, goal_x_, goal_y_);
 }
 
-ReferencePath USVPlanner::buildLocalReferenceWindow(const ReferencePath &path) const
+ReferencePath UGVPlanner::buildLocalReferenceWindow(const ReferencePath &path) const
 {
     if (!has_odom_ || path.points.size() < 2)
         return path;
@@ -449,7 +449,7 @@ ReferencePath USVPlanner::buildLocalReferenceWindow(const ReferencePath &path) c
     return local;
 }
 
-ReferencePath USVPlanner::buildContouringReferenceWindow(const ReferencePath &path) const
+ReferencePath UGVPlanner::buildContouringReferenceWindow(const ReferencePath &path) const
 {
     if (!has_odom_ || path.points.size() < 2)
         return path;
@@ -463,12 +463,12 @@ ReferencePath USVPlanner::buildContouringReferenceWindow(const ReferencePath &pa
     path.findClosest(ego_pos, s_near);
     s_near = std::clamp(s_near, 0.0, total);
 
-    // 单体 Fishbot 无动态障碍: danger 恒为 0
+    // 单体 UGV 无动态障碍: danger 恒为 0
     const double danger = 0.0;
 
     const double back_margin = 0.35 + 0.30 * danger;
     const double start_s = std::max(0.0, s_near - back_margin);
-    // Fishbot 短路径: 固定 0.08m 步长重采样, 保留 V-PRM 绕行路径细节
+    // UGV 短路径: 固定 0.08m 步长重采样, 保留 V-PRM 绕行路径细节
     // (原 0.40m 会把 2.6m 绕行路径重采样成 ~9 点, 样条拟合后绕行段丢失,
     //  MPC 只看到"前方障碍"→ 不敢走, 即"V-PRM 绕了但 MPC 不知道";
     //  且步长不能跟 desired_speed 走: speed=1.0 时 0.25m 仍会丢绕行细节)
@@ -502,7 +502,7 @@ ReferencePath USVPlanner::buildContouringReferenceWindow(const ReferencePath &pa
     return local;
 }
 
-void USVPlanner::rebuildActiveReference()
+void UGVPlanner::rebuildActiveReference()
 {
     if (!(has_reference_path_ && smooth_ref_path_.points.size() >= 2))
     {
@@ -515,16 +515,16 @@ void USVPlanner::rebuildActiveReference()
     ref_path_ = buildLocalReferenceWindow(smooth_ref_path_);
 }
 
-void USVPlanner::controlLoop()
+void UGVPlanner::controlLoop()
 {
     // [DBG] entry
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000,
-        "[DBG_ENTER] USV-%d controlLoop has_odom=%d has_goal=%d metrics_written=%d ego=(%.1f,%.1f)",
+        "[DBG_ENTER] UGV-%d controlLoop has_odom=%d has_goal=%d metrics_written=%d ego=(%.1f,%.1f)",
         agent_id_, has_odom_, has_goal_, metrics_written_, ego_.x, ego_.y);
     if (!has_odom_ || !has_goal_)
     {
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
-            "[DBG_SKIP] USV-%d skip: odom=%d goal=%d", agent_id_, has_odom_, has_goal_);
+            "[DBG_SKIP] UGV-%d skip: odom=%d goal=%d", agent_id_, has_odom_, has_goal_);
         return;
     }
 
@@ -558,17 +558,17 @@ void USVPlanner::controlLoop()
         near_goal_cooldown_--;
     }
 
-    bool near_goal = (dist_to_goal < 0.35)   // 单体: Fishbot 到达半径
+    bool near_goal = (dist_to_goal < 0.35)   // 单体: UGV 到达半径
                      && (this->now() > reset_guard_until_)
                      && (near_goal_cooldown_ == 0);
     if (near_goal && !metrics_written_)
     {
-        RCLCPP_INFO(this->get_logger(), "USV-%d arrived (dist=%.2f near=%d) ✓",
+        RCLCPP_INFO(this->get_logger(), "UGV-%d arrived (dist=%.2f near=%d) ✓",
             agent_id_, dist_to_goal, (int)near_goal);
         done_ = true;
         writeEpisodeMetricsIfNeeded(false);
 
-        std::string done_path = "/home/lu/paper2/core_ws/trial_done_" + std::to_string(agent_id_) + ".flag";
+        std::string done_path = "trial_done_" + std::to_string(agent_id_) + ".flag";
         std::ofstream done_flag(done_path);
         if (done_flag.is_open())
             done_flag << "arrived " << std::fixed << std::setprecision(1) << episode_elapsed << "s\n";
@@ -576,12 +576,12 @@ void USVPlanner::controlLoop()
 
     if (!metrics_written_ && episode_elapsed > episode_timeout_s_)
     {
-        RCLCPP_WARN(this->get_logger(), "EP timeout usv=%d elapsed=%.1f x=%.1f dist=%.2f — forcing stop",
+        RCLCPP_WARN(this->get_logger(), "EP timeout ugv=%d elapsed=%.1f x=%.1f dist=%.2f — forcing stop",
             agent_id_, episode_elapsed, ego_.x, dist_to_goal);
         done_ = true;
         writeEpisodeMetricsIfNeeded(true);
 
-        std::string done_path = "/home/lu/paper2/core_ws/trial_done_" + std::to_string(agent_id_) + ".flag";
+        std::string done_path = "trial_done_" + std::to_string(agent_id_) + ".flag";
         std::ofstream done_flag(done_path);
         if (done_flag.is_open())
             done_flag << "timeout " << std::fixed << std::setprecision(1) << episode_elapsed << "s\n";
@@ -592,12 +592,12 @@ void USVPlanner::controlLoop()
     {
         passed_threshold_ = true;
 
-        std::string done_path = "/home/lu/paper2/core_ws/trial_done_" + std::to_string(agent_id_) + ".flag";
+        std::string done_path = "trial_done_" + std::to_string(agent_id_) + ".flag";
         std::ofstream done_flag(done_path);
         if (done_flag.is_open())
             done_flag << "passed " << std::fixed << std::setprecision(1) << episode_elapsed << "s\n";
 
-        RCLCPP_INFO(this->get_logger(), "USV-%d PASSED x=%.1f > %.1f at %.1f s — flag written, continuing to goal",
+        RCLCPP_INFO(this->get_logger(), "UGV-%d PASSED x=%.1f > %.1f at %.1f s — flag written, continuing to goal",
                     agent_id_, ego_.x, pass_x_threshold_, episode_elapsed);
     }
 
@@ -608,7 +608,7 @@ void USVPlanner::controlLoop()
             auto stuck_duration = std::chrono::steady_clock::now() - solver_start_time_;
             if (stuck_duration > std::chrono::seconds(5))
             {
-                RCLCPP_WARN(this->get_logger(), "USV-%d solver STUCK for %.1fs — force reset",
+                RCLCPP_WARN(this->get_logger(), "UGV-%d solver STUCK for %.1fs — force reset",
                     agent_id_, std::chrono::duration<double>(stuck_duration).count());
                 acados_solver_was_reset_ = true;
                 optimizing_ = false;
@@ -625,7 +625,7 @@ void USVPlanner::controlLoop()
 
     const bool has_selected_ref = has_reference_path_ && smooth_ref_path_.points.size() >= 2;
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 3000,
-        "[DBG_REF] USV-%d has_selected_ref=%d ref_pts=%zu metrics_written=%d",
+        "[DBG_REF] UGV-%d has_selected_ref=%d ref_pts=%zu metrics_written=%d",
         agent_id_, has_selected_ref,
         smooth_ref_path_.points.size(), metrics_written_);
     if (!has_selected_ref)
@@ -637,7 +637,7 @@ void USVPlanner::controlLoop()
         auto cmd = geometry_msgs::msg::Twist();
         pub_cmd_vel_->publish(cmd);
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1500,
-            "USV-%d waiting reference path, hold position", agent_id_);
+            "UGV-%d waiting reference path, hold position", agent_id_);
         return;
     }
 
@@ -796,8 +796,8 @@ void USVPlanner::controlLoop()
 
     double log_clr_st = (std::isfinite(nearest_obstacle_clearance) && nearest_obstacle_clearance < 900.0) ? nearest_obstacle_clearance : 999.0;
     {
-        const char *csv_env = std::getenv("MULTI_USV_RESULTS_CSV");
-        std::string csv_path = csv_env ? std::string(csv_env) : "/home/lu/paper2/core_ws/results_multi_usv.csv";
+        const char *csv_env = std::getenv("MULTI_UGV_RESULTS_CSV");
+        std::string csv_path = csv_env ? std::string(csv_env) : "results_multi_ugv.csv";
         int fd = ::open(csv_path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
         if (fd >= 0) {
             ::close(fd);
@@ -832,7 +832,7 @@ void USVPlanner::controlLoop()
     } // end of if (!metrics_written_)
 }
 
-void USVPlanner::updateEpisodeMetrics()
+void UGVPlanner::updateEpisodeMetrics()
 {
     for (const auto &obs : static_obstacles_)
     {
@@ -843,14 +843,14 @@ void USVPlanner::updateEpisodeMetrics()
     }
 }
 
-void USVPlanner::writeEpisodeMetricsIfNeeded(bool timeout)
+void UGVPlanner::writeEpisodeMetricsIfNeeded(bool timeout)
 {
     if (!metrics_initialized_ || metrics_written_) return;
     metrics_written_ = true;
 
     const double duration = (this->now() - episode_start_time_).seconds();
-    const char *csv_env = std::getenv("MULTI_USV_RESULTS_CSV");
-    const std::string path = csv_env ? std::string(csv_env) : "/home/lu/paper2/core_ws/results_multi_usv.csv";
+    const char *csv_env = std::getenv("MULTI_UGV_RESULTS_CSV");
+    const std::string path = csv_env ? std::string(csv_env) : "results_multi_ugv.csv";
     std::ofstream out(path, std::ios::app);
     if (!out.is_open()) return;
     int fd = ::open(path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
@@ -863,7 +863,7 @@ void USVPlanner::writeEpisodeMetricsIfNeeded(bool timeout)
         << min_static_clearance_ << '\n';
 }
 
-Trajectory USVPlanner::runMPC()
+Trajectory UGVPlanner::runMPC()
 {
     auto t0 = std::chrono::steady_clock::now();
     rebuildActiveReference();
@@ -891,7 +891,7 @@ Trajectory USVPlanner::runMPC()
     auto t4 = std::chrono::steady_clock::now();
 
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
-        "[TIMING] USV-%d ref=%.0fms win=%.0fms cons=%.0fms solve=%.0fms ncons=%zu refpts=%zu status=%s",
+        "[TIMING] UGV-%d ref=%.0fms win=%.0fms cons=%.0fms solve=%.0fms ncons=%zu refpts=%zu status=%s",
         agent_id_,
         std::chrono::duration<double, std::milli>(t1 - t0).count(),
         std::chrono::duration<double, std::milli>(t2 - t1).count(),
@@ -906,7 +906,7 @@ Trajectory USVPlanner::runMPC()
     return traj;
 }
 
-void USVPlanner::publishCommand(const Trajectory &traj)
+void UGVPlanner::publishCommand(const Trajectory &traj)
 {
     auto cmd = geometry_msgs::msg::Twist();
     RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 800,
@@ -940,7 +940,7 @@ void USVPlanner::publishCommand(const Trajectory &traj)
 }
 
 
-void USVPlanner::publishTrajectoryPath(const Trajectory &traj)
+void UGVPlanner::publishTrajectoryPath(const Trajectory &traj)
 {
     (void)traj;
     auto path = nav_msgs::msg::Path();
@@ -970,7 +970,7 @@ void USVPlanner::publishTrajectoryPath(const Trajectory &traj)
     pub_ref_path_->publish(path);
 }
 
-void USVPlanner::publishVisualization(const Trajectory &traj)
+void UGVPlanner::publishVisualization(const Trajectory &traj)
 {
     visualization_msgs::msg::MarkerArray markers;
     const auto stamp = this->now();
@@ -1174,7 +1174,7 @@ void USVPlanner::publishVisualization(const Trajectory &traj)
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<USVPlanner>());
+    rclcpp::spin(std::make_shared<UGVPlanner>());
     rclcpp::shutdown();
     return 0;
 }

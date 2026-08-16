@@ -1,9 +1,9 @@
-#include <multi_usv_planner/mpc_solver.h>
+#include <multi_ugv_planner/mpc_solver.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 namespace
@@ -529,7 +529,7 @@ void MPCSolver::computeGradient(const std::vector<SolverState> &states,
     }
 }
 
-Trajectory MPCSolver::solve(const USVState &state,
+Trajectory MPCSolver::solve(const UGVState &state,
                             const StageObstacleSet &obstacles_by_stage,
                             double goal_x, double goal_y)
 {
@@ -767,4 +767,4 @@ Trajectory MPCSolver::solve(const USVState &state,
     return traj;
 }
 
-} // namespace MultiUSV
+} // namespace MultiUGV

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>multi_usv_planner</name>
+  <name>multi_ugv_planner</name>
   <version>0.1.0</version>
-  <description>Contouring MPC planner for the Fishbot two-wheel differential robot, with soft ellipsoid (Test A) and hard linearized (Test B) obstacle constraints.</description>
+  <description>Contouring MPC planner for the UGV two-wheel differential robot, with soft ellipsoid (Test A) and hard linearized (Test B) obstacle constraints.</description>
   <maintainer email="solelyman@example.com">solelyman</maintainer>
   <license>Apache-2.0</license>
 

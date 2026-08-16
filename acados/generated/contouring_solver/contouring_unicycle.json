@@ -19,7 +19,7 @@
             "force_canonical": false,
             "mex": false
         },
-        "code_export_directory": "/home/lu/RL/paper2/core_ws/src/multi_usv_planner/acados/generated/contouring_solver",
+        "code_export_directory": ".",
         "cython_include_dirs": [
             "/home/lu/.local/lib/python3.10/site-packages/numpy/core/include",
             "/usr/include/python3.10"
@@ -30,7 +30,7 @@
         "ext_fun_expand_dyn": false,
         "ext_fun_expand_precompute": false,
         "generate_hess": true,
-        "json_file": "/home/lu/RL/paper2/core_ws/src/multi_usv_planner/acados/generated/contouring_solver/contouring_unicycle.json",
+        "json_file": "./contouring_unicycle.json",
         "model_external_shared_lib_dir": null,
         "model_external_shared_lib_name": null,
         "os": "unix",

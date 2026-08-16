@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""假 odom: 订阅 /cmd_vel 按 unicycle 积分, 发布 /odom (BEST_EFFORT), 模拟 Fishbot 闭环"""
+"""假 odom: 订阅 /cmd_vel 按 unicycle 积分, 发布 /odom (BEST_EFFORT), 模拟 UGV 闭环"""
 import math, rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry

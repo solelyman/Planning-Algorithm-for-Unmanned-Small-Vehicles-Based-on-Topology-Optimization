@@ -1,7 +1,7 @@
-#include <multi_usv_planner/constraint_builder.h>
-#include <multi_usv_planner/acados_contouring_solver.h>
+#include <multi_ugv_planner/constraint_builder.h>
+#include <multi_ugv_planner/acados_contouring_solver.h>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 /// @brief Get reference path position at time @p tk.
@@ -30,7 +30,7 @@ static Eigen::Vector2d refPos(const ReferencePath &ref, double tk)
 
 StageConstraintSet ConstraintBuilder::build(
     const ReferencePath &contour_ref,
-    const USVState & /*ego*/,
+    const UGVState & /*ego*/,
     const std::vector<Obstacle> &static_obstacles,
     double robot_radius,
     double obstacle_clearance,
@@ -80,7 +80,7 @@ StageConstraintSet ConstraintBuilder::build(
             cands.push_back({ego_pred.x(), y_max, wall_margin, dist_top});
         }
 
-        // 单体 Fishbot: 无动态障碍/邻居
+        // 单体 UGV: 无动态障碍/邻居
         // Sort by distance to predicted ego, take N_ELLIPSOIDS
         std::sort(cands.begin(), cands.end(), [](const Candidate &a, const Candidate &b) {
                 return a.dist < b.dist;
@@ -137,4 +137,4 @@ StageConstraintSet ConstraintBuilder::build(
     return sc_set;
 }
 
-}  // namespace MultiUSV
+}  // namespace MultiUGV

@@ -1,4 +1,4 @@
-#include <multi_usv_planner/acados_contouring_solver.h>
+#include <multi_ugv_planner/acados_contouring_solver.h>
 
 #include <cmath>
 #include <cstdlib>
@@ -13,7 +13,7 @@ extern "C" {
 #include "acados_c/ocp_nlp_interface.h"
 }
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 namespace
@@ -297,7 +297,7 @@ void AcadosContouringSolver::setStageParams(int stage, double reference_velocity
     contouring_unicycle_acados_update_params(capsule_, stage, p, NP);
 }
 
-Trajectory AcadosContouringSolver::solve(const USVState &state,
+Trajectory AcadosContouringSolver::solve(const UGVState &state,
                                           const ReferencePath &ref_path,
                                           const StageConstraintSet &stage_constraints)
 {
@@ -325,7 +325,7 @@ Trajectory AcadosContouringSolver::solve(const USVState &state,
     double path_len = ref_path.length();
     auto speed_ref_at = [&](double s_ref) -> double
     {
-        // 减速区长度按 desired_speed 缩放(适配 Fishbot 数米级短路径, 原 8.0 是 USV 尺度)
+        // 减速区长度按 desired_speed 缩放(适配 UGV 数米级短路径, 原 8.0 是 UGV 尺度)
         double remain = std::max(path_len - s_ref, 0.0);
         double v_scale = std::clamp(remain / std::max(1.0, 3.0 * params_.desired_speed), 0.15, 1.0);
         return params_.desired_speed * v_scale;
@@ -516,4 +516,4 @@ Trajectory AcadosContouringSolver::solve(const USVState &state,
     return traj;
 }
 
-} // namespace MultiUSV
+} // namespace MultiUGV

@@ -1,11 +1,11 @@
-#ifndef MULTI_USV_PLANNER_H
-#define MULTI_USV_PLANNER_H
+#ifndef MULTI_UGV_PLANNER_H
+#define MULTI_UGV_PLANNER_H
 
-#include <multi_usv_planner/types.h>
-#include <multi_usv_planner/mpc_solver.h>
-#include <multi_usv_planner/acados_contouring_solver.h>
-#include <multi_usv_planner/controller.h>
-#include <multi_usv_planner/constraint_builder.h>
+#include <multi_ugv_planner/types.h>
+#include <multi_ugv_planner/mpc_solver.h>
+#include <multi_ugv_planner/acados_contouring_solver.h>
+#include <multi_ugv_planner/controller.h>
+#include <multi_ugv_planner/constraint_builder.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <nav_msgs/msg/odometry.hpp>
@@ -22,12 +22,12 @@
 #include <fstream>
 #include <limits>
 
-namespace MultiUSV
+namespace MultiUGV
 {
-class USVPlanner : public rclcpp::Node
+class UGVPlanner : public rclcpp::Node
 {
 public:
-    USVPlanner();
+    UGVPlanner();
 
 private:
     void declareParams();
@@ -52,7 +52,7 @@ private:
 
     //State
     int agent_id_ = 0;
-    USVState ego_;
+    UGVState ego_;
     double goal_x_ = 100.0, goal_y_ = 0.0;
     bool has_goal_ = false;
     bool has_odom_ = false;
@@ -76,7 +76,7 @@ private:
     bool selected_reference_active_ = false;
     double last_progress_dist_to_goal_ = std::numeric_limits<double>::infinity();
     rclcpp::Time last_progress_time_{0, 0, RCL_ROS_TIME};
-    USVController controller_;
+    UGVController controller_;
 
     ConstraintBuilder constraint_builder_;
 
@@ -120,6 +120,6 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 };
 
-} // namespace MultiUSV
+} // namespace MultiUGV
 
 #endif

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Fishbot 上车 V-PRM 节点: /scan + /odom -> VPRM.plan() -> /reference_path
+UGV 上车 V-PRM 节点: /scan + /odom -> VPRM.plan() -> /reference_path
 ====================================================================
-V-PRM 全局规划(世界坐标), 输出参考路径给 paper2 的 C++ unicycle MPC
-(usv_planner_node_exe). 复用 deploy_robot.py 验证过的 VPRM 类 +
-fishbot_interfaces.py 的传感器转换.
+V-PRM 全局规划(世界坐标), 输出参考路径给 C++ unicycle MPC
+(ugv_planner_node_exe). 复用 deploy_robot.py 验证过的 VPRM 类 +
+ugv_interfaces.py 的传感器转换.
 
 话题:
   订阅 /scan      (sensor_msgs/LaserScan,  RELIABLE)    雷达
@@ -13,7 +13,7 @@ fishbot_interfaces.py 的传感器转换.
   订阅 /goal_pose (geometry_msgs/PoseStamped, 可选, RViz 2D Goal)
 
 用法:
-  python fishbot_vprm_node.py --goal-x 2.0 --goal-y 0.0
+  python ugv_vprm_node.py --goal-x 2.0 --goal-y 0.0
 """
 import argparse
 import math
@@ -23,7 +23,7 @@ import os
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from fishbot_interfaces import (FISHBOT, USVState, odom_qos_profile,
+from ugv_interfaces import (FISHBOT, UGVState, odom_qos_profile,
                                 odom_to_state, scan_to_vprm_update_args,
                                 path_to_path_msg)
 from deploy_robot import VPRM
@@ -35,15 +35,15 @@ from nav_msgs.msg import Odometry, Path
 from geometry_msgs.msg import PoseStamped, Point
 
 
-class FishbotVPRMNode(Node):
+class UGVVPRMNode(Node):
     def __init__(self, goal_xy):
-        super().__init__("fishbot_vprm_node")
+        super().__init__("ugv_vprm_node")
         self.vprm = VPRM(**{
             'margin': 0.3, 'n_samples': 240, 'neighbor_r': 2.0,
             'clearance': 0.35, 'w_narrow': 5.0, 'lookahead': 1.8,
             'keep_s': 5.0, 'map_span': 5.0, 'cell': 0.06,
         })
-        self.state = USVState()
+        self.state = UGVState()
         self.goal = np.array(goal_xy, dtype=float)
         self._last_path = None      # 上一条安全路径 (翻转抑制)
         self._last_path_time = 0.0
@@ -56,12 +56,12 @@ class FishbotVPRMNode(Node):
         self.sub_goal = self.create_subscription(
             PoseStamped, "/goal_pose", self.goal_cb, 10)
 
-        # 发布: 参考路径 (transient_local, 对齐 paper2 prm_node 发布方式)
+        # 发布: 参考路径 (transient_local)
         qos = rclpy.qos.QoSProfile(
             depth=1, reliability=rclpy.qos.ReliabilityPolicy.RELIABLE,
             durability=rclpy.qos.DurabilityPolicy.TRANSIENT_LOCAL)
         self.pub_path = self.create_publisher(Path, "/reference_path", qos)
-        # 发布: 目标转发给 usv_planner 的 /final_goal (Point), 触发 episode 重置
+        # 发布: 目标转发给 ugv_planner 的 /final_goal (Point), 触发 episode 重置
         self.pub_goal = self.create_publisher(Point, "/final_goal", 10)
 
         self.timer = self.create_timer(0.3, self.loop)  # 3.3Hz: 路径稳定, 避免 MPC 追移动起点原地打转
@@ -69,7 +69,7 @@ class FishbotVPRMNode(Node):
         # 直接发布 [车位置→goal] 直线路径让 MPC 冲线停车, 避免绕圈/倒车
         self.approach_r = 1.5
         self.get_logger().info(
-            f"Fishbot V-PRM 启动 | goal=({self.goal[0]:.2f},{self.goal[1]:.2f}) | "
+            f"UGV V-PRM 启动 | goal=({self.goal[0]:.2f},{self.goal[1]:.2f}) | "
             f"margin=0.6 lookahead=1.8 | 发布 /reference_path")
 
     def scan_cb(self, msg):
@@ -85,12 +85,12 @@ class FishbotVPRMNode(Node):
         self.goal = np.array([msg.pose.position.x, msg.pose.position.y], dtype=float)
         pt = Point()
         pt.x = float(self.goal[0]); pt.y = float(self.goal[1])
-        self.pub_goal.publish(pt)   # 转发给 usv_planner 重置 episode
+        self.pub_goal.publish(pt)   # 转发给 ugv_planner 重置 episode
         self.get_logger().info(f"新目标: ({self.goal[0]:.2f}, {self.goal[1]:.2f}), 已转发 /final_goal")
 
     def _densify(self, path, spacing=0.05):
         """把 VPRM 稀疏 waypoints 插值成 <=spacing 间隔的密集点。
-        paper2 的 acados contouring solver 期望密集参考路径(仿真里 V-PRM 输出
+        acados contouring solver 期望密集参考路径(仿真里 V-PRM 输出
         就是密集点), 2 点路径会退化成样条无约束且易触发求解失败。"""
         pts = [np.asarray(p, dtype=float) for p in path]
         if len(pts) < 2:
@@ -220,7 +220,7 @@ def main():
     args = ap.parse_args()
 
     rclpy.init()
-    node = FishbotVPRMNode((args.goal_x, args.goal_y))
+    node = UGVVPRMNode((args.goal_x, args.goal_y))
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

@@ -1,12 +1,12 @@
-#ifndef MULTI_USV_MPC_SOLVER_H
-#define MULTI_USV_MPC_SOLVER_H
+#ifndef MULTI_UGV_MPC_SOLVER_H
+#define MULTI_UGV_MPC_SOLVER_H
 
-#include <multi_usv_planner/types.h>
+#include <multi_ugv_planner/types.h>
 #include <Eigen/Dense>
 #include <vector>
 #include <memory>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 struct ReferencePathSample
@@ -103,7 +103,7 @@ public:
     void setCurrentHeading(double psi);
     void clearWarmstart();
 
-    Trajectory solve(const USVState &state,
+    Trajectory solve(const UGVState &state,
                      const StageObstacleSet &obstacles_by_stage,
                      double goal_x, double goal_y);
 
@@ -145,6 +145,6 @@ private:
     mutable std::vector<Eigen::Vector2d> tmp_controls_;
 };
 
-} // namespace MultiUSV
+} // namespace MultiUGV
 
 #endif

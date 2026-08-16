@@ -1,11 +1,11 @@
-#ifndef MULTI_USV_TYPES_H
-#define MULTI_USV_TYPES_H
+#ifndef MULTI_UGV_TYPES_H
+#define MULTI_UGV_TYPES_H
 
 #include <Eigen/Dense>
 #include <vector>
 #include <cmath>
 
-namespace MultiUSV
+namespace MultiUGV
 {
 
 //2D Pose with heading
@@ -60,8 +60,8 @@ struct Obstacle
     double x = 0.0, y = 0.0, radius = 1.0;
 };
 
-// USV state
-struct USVState
+// UGV state
+struct UGVState
 {
     double x = 0.0, y = 0.0, psi = 0.0;
     double v = 0.0, omega = 0.0;
@@ -70,6 +70,6 @@ struct USVState
     Eigen::Vector2d pos() const { return Eigen::Vector2d(x, y); }
 };
 
-} // namespace MultiUSV
+} // namespace MultiUGV
 
 #endif
