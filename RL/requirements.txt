@@ -1,4 +1,4 @@
-# ugv_rl — 端到端 PPO 激光导航
+# RL — 端到端 PPO 激光导航
 mujoco>=3.0
 gymnasium
 numpy

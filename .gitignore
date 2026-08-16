@@ -10,8 +10,8 @@ log/
 __pycache__/
 *.pyc
 
-# RL training artifacts (ugv_rl)
-ugv_rl/models/
+# RL training artifacts (RL/)
+RL/models/
 
 # Editors / OS
 .vscode/

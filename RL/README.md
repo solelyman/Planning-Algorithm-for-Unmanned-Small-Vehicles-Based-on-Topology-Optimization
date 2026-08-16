@@ -79,7 +79,7 @@ pip install mujoco gymnasium numpy torch stable-baselines3
 ## 5. 文件说明
 
 ```
-ugv_rl/
+RL/
 ├── assets/ugv.xml        # MuJoCo 车模 (两轮差速 + 90束激光 + 金色目标标记)
 ├── end2end_env.py            # Gymnasium 环境 (激光观测 / 5条奖励 / A*老师 / LOS控制器)
 ├── vprm_planner.py           # A* 网格全局路径 (距离场启发)

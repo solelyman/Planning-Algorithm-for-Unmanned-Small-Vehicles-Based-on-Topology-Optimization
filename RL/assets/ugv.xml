@@ -1,4 +1,4 @@
-<mujoco model="fishbot">
+<mujoco model="ugv">
   <compiler angle="degree" coordinate="local" meshdir="none"/>
   <option timestep="0.02" gravity="0 0 -9.81">
     <flag contact="enable"/>
