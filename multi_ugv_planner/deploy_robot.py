@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FishBot 真车 NavRL 部署: 雷达 -> V-PRM 全局路径 -> RL(PO) -> cmd_vel
+UGV 真车 NavRL 部署: 雷达 -> V-PRM 全局路径 -> RL(PO) -> cmd_vel
   - 订阅 /scan (鱼香ROS ydlidar 节点发布)
   - V-PRM 增量点图 (世界坐标) + 净空加权建图 -> 前方引导点
     (与训练 env 的 V-PRM 同语义: obs[36] 剩余弧长/15, obs[37] 引导点角)

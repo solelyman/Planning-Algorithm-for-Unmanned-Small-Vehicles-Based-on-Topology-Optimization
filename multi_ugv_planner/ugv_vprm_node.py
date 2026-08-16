@@ -23,7 +23,7 @@ import os
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ugv_interfaces import (FISHBOT, UGVState, odom_qos_profile,
+from ugv_interfaces import (UGV, UGVState, odom_qos_profile,
                                 odom_to_state, scan_to_vprm_update_args,
                                 path_to_path_msg)
 from deploy_robot import VPRM

@@ -55,7 +55,7 @@ class UGVModel:
     goal_radius: float = 0.25        # 距离目标 < 此值视为到达 [m]
 
 
-FISHBOT = UGVModel()
+UGV = UGVModel()
 
 # =====================================================================
 # 2. ROS 话题 / QoS 约定
@@ -170,7 +170,7 @@ def scan_to_ellipsoids(msg, state: UGVState, radius: float = 0.35,
             bins[k] = (d, p)
     ells = []
     for (_, p) in bins.values():
-        ells.append((float(p[0]), float(p[1]), radius + FISHBOT.body_radius))
+        ells.append((float(p[0]), float(p[1]), radius + UGV.body_radius))
         if len(ells) >= max_ell:
             break
     return ells
@@ -241,7 +241,7 @@ def traj_to_twist(traj, limits: Optional[UGVModel] = None):
     取第一预测步的速度/角速度, clamp 到 UGV 限幅.
     若 traj 为空返回全零指令."""
     from geometry_msgs.msg import Twist
-    m = limits or FISHBOT
+    m = limits or UGV
     cmd = Twist()
     if traj is None or len(traj) == 0:
         return cmd
