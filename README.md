@@ -18,11 +18,14 @@ Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
 
 当前 RL 展示使用履带式 UGV、MuJoCo 碰撞动力学、激光观测和连续目标切换。演示策略为 SAC checkpoint 加轻量转向保护，主要用于验证策略能否在同一场景中连续完成多个目标点。
 
-![MuJoCo 3D SAC demo](RL/docs/images/sac_mujoco_3d_seed2.gif)
+<p align="center">
+  <img src="RL/docs/images/sac_mujoco_3d_seed2.gif" alt="MuJoCo 3D SAC demo" width="49%">
+  <img src="RL/docs/images/sac_multigoal_seed2.gif" alt="SAC continuous-goal demo" width="49%">
+</p>
 
-![SAC continuous-goal demo](RL/docs/images/sac_multigoal_seed2.gif)
-
-![SAC MuJoCo workflow](RL/docs/images/sac_mujoco_pipeline.svg)
+<p align="center">
+  <img src="RL/docs/images/sac_mujoco_pipeline.svg" alt="SAC MuJoCo workflow" width="86%">
+</p>
 
 ## Project Layout
 
@@ -41,7 +44,9 @@ Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
 
 The classic stack is a ROS 2 Humble navigation pipeline for a differential-drive UGV. It combines an online V-PRM planner with an acados-based contouring MPC controller.
 
-![V-PRM + Contouring MPC architecture](docs/images/mpc_architecture_figure2.svg)
+<p align="center">
+  <img src="docs/images/mpc_architecture_figure2.svg" alt="V-PRM + Contouring MPC architecture" width="92%">
+</p>
 
 ```bash
 cd <ros2_ws>/src

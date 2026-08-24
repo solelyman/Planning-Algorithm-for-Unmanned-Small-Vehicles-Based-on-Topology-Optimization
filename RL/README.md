@@ -6,13 +6,15 @@ This folder contains the reinforcement-learning navigation branch of the small U
 
 The current visual demo runs a tracked UGV in MuJoCo with lidar-style observations, real collision geometry, and consecutive goal switching.
 
-![MuJoCo 3D SAC demo](docs/images/sac_mujoco_3d_seed2.gif)
+<p align="center">
+  <img src="docs/images/sac_mujoco_3d_seed2.gif" alt="MuJoCo 3D SAC demo" width="49%">
+  <img src="docs/images/sac_multigoal_seed2.gif" alt="SAC continuous-goal demo" width="49%">
+</p>
 
-![MuJoCo 3D snapshot](docs/images/sac_mujoco_3d_seed2.png)
-
-![SAC continuous-goal demo](docs/images/sac_multigoal_seed2.gif)
-
-![SAC MuJoCo workflow](docs/images/sac_mujoco_pipeline.svg)
+<p align="center">
+  <img src="docs/images/sac_mujoco_3d_seed2.png" alt="MuJoCo 3D snapshot" width="49%">
+  <img src="docs/images/sac_mujoco_pipeline.svg" alt="SAC MuJoCo workflow" width="49%">
+</p>
 
 ## Current Result
 
@@ -30,7 +32,9 @@ The checkpoint is about 324 MB, so it is not committed to Git. Use Git LFS or a 
 | SAC checkpoint | heading guard | 2, 7, 8, 10 | 8/8 goals, 0 collision in tested seeds |
 | SAC checkpoint | heading guard | seed 2 GUI | 10/10 goals, 0 collision, 0 timeout |
 
-![SAC training curve](docs/results/sac_curve.png)
+<p align="center">
+  <img src="docs/results/sac_curve.png" alt="SAC training curve" width="78%">
+</p>
 
 ## Run
 

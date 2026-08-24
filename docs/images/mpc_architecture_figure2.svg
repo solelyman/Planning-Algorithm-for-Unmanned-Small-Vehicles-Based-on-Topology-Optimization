@@ -1,129 +1,150 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="760" viewBox="0 0 1500 760">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fcfcff"/>
-      <stop offset="1" stop-color="#f6fbff"/>
-    </linearGradient>
-    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#79d7ff"/>
-      <stop offset="1" stop-color="#3178ff"/>
-    </linearGradient>
-    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffbf7a"/>
-      <stop offset="1" stop-color="#ff765f"/>
-    </linearGradient>
-    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#a7efbe"/>
-      <stop offset="1" stop-color="#2fb16e"/>
-    </linearGradient>
-    <filter id="shadow" x="-18%" y="-18%" width="136%" height="136%">
-      <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#1d2b3a" flood-opacity="0.13"/>
+    <pattern id="tealHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#65cdbf" stroke-width="2" opacity="0.35"/>
+    </pattern>
+    <pattern id="roseHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#f29c9c" stroke-width="2" opacity="0.32"/>
+    </pattern>
+    <pattern id="blueHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#9ba6de" stroke-width="2" opacity="0.34"/>
+    </pattern>
+    <pattern id="yellowHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#efbf54" stroke-width="2" opacity="0.35"/>
+    </pattern>
+    <filter id="paperShadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="3" dy="5" stdDeviation="3" flood-color="#1f2937" flood-opacity="0.15"/>
     </filter>
     <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto" markerUnits="strokeWidth">
-      <path d="M2 2 L12 7 L2 12 Z" fill="#263445"/>
+      <path d="M2 2 L12 7 L2 12 Z" fill="#222831"/>
     </marker>
     <style>
-      .title{font:800 32px Arial, sans-serif;fill:#172033}
-      .sub{font:500 16px Arial, sans-serif;fill:#64748b}
-      .h{font:800 20px Arial, sans-serif;fill:#172033}
-      .txt{font:600 15px Arial, sans-serif;fill:#334155}
-      .tiny{font:500 13px Arial, sans-serif;fill:#64748b}
-      .frame{fill:white;stroke:#1f2937;stroke-width:2.4;stroke-dasharray:9 8}
-      .card{fill:white;stroke:#d7e0ea;stroke-width:2;filter:url(#shadow)}
-      .arrow{stroke:#263445;stroke-width:3;fill:none;marker-end:url(#arrow)}
-      .soft{stroke:#94a3b8;stroke-width:2.2;fill:none;stroke-dasharray:7 7;marker-end:url(#arrow)}
-      .topic{font:700 15px Arial, sans-serif;fill:white}
-      .node{fill:#f8fbff;stroke:#8aa0ba;stroke-width:2}
-      .path{stroke:#23ad65;stroke-width:4.5;fill:none;stroke-linecap:round;stroke-dasharray:10 8}
-      .traj{stroke:#f97316;stroke-width:4.5;fill:none;stroke-linecap:round}
-      .obs{fill:#c7833a;stroke:#68411f;stroke-width:2}
-      .robot{fill:#2f6df6;stroke:#152238;stroke-width:3}
+      .title{font:700 28px Arial, sans-serif;fill:#172033}
+      .caption{font:500 15px Arial, sans-serif;fill:#5c6470}
+      .label{font:700 19px Arial, sans-serif;fill:#222831}
+      .small{font:500 14px Arial, sans-serif;fill:#414957}
+      .tiny{font:500 12px Arial, sans-serif;fill:#5c6470}
+      .paper{fill:#fffdf8;stroke:#222831;stroke-width:2.4;filter:url(#paperShadow)}
+      .rough{fill:none;stroke:#222831;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+      .arrow{fill:none;stroke:#222831;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}
+      .dash{fill:none;stroke:#4b5563;stroke-width:2;stroke-dasharray:7 6;marker-end:url(#arrow)}
+      .lidar{stroke:#ee9b32;stroke-width:1.5;opacity:0.7}
+      .path{fill:none;stroke:#2985d9;stroke-width:4;stroke-linecap:round}
     </style>
   </defs>
-  <rect width="1500" height="760" fill="url(#bg)"/>
-  <text x="750" y="56" text-anchor="middle" class="title">Figure 2. V-PRM + Contouring MPC Architecture</text>
-  <text x="750" y="84" text-anchor="middle" class="sub">laser perception · topology-aware global path · real-time MPC tracking · velocity command</text>
-  <rect x="66" y="122" width="1368" height="568" rx="34" class="frame"/>
 
-  <g transform="translate(110 170)">
-    <rect width="250" height="190" rx="24" class="card"/>
-    <circle cx="48" cy="46" r="25" fill="url(#blue)"/>
-    <text x="48" y="53" text-anchor="middle" class="topic">01</text>
-    <text x="88" y="45" class="h">Sensors</text>
-    <text x="88" y="72" class="tiny">/scan + /odom</text>
-    <path d="M78 132 L138 98 L208 132" fill="none" stroke="#f59e0b" stroke-width="3"/>
-    <circle cx="78" cy="132" r="9" fill="#2563eb"/>
-    <line x1="78" y1="132" x2="38" y2="105" stroke="#f59e0b" stroke-width="2"/>
-    <line x1="78" y1="132" x2="38" y2="132" stroke="#f59e0b" stroke-width="2"/>
-    <line x1="78" y1="132" x2="38" y2="159" stroke="#f59e0b" stroke-width="2"/>
-    <text x="126" y="164" text-anchor="middle" class="txt">range + pose</text>
+  <rect width="1280" height="820" fill="#f8fafc"/>
+  <path d="M55 65 C280 45 468 68 650 48 C865 24 1020 62 1218 46" class="rough" opacity="0.18"/>
+  <text x="640" y="56" text-anchor="middle" class="title">Figure 2. Traditional V-PRM + MPC Navigation Framework</text>
+  <text x="640" y="84" text-anchor="middle" class="caption">goal command, lidar/odom feedback, topology path planning, obstacle constraints, and real-time tracking control</text>
+
+  <g transform="translate(505 116) rotate(-1.2 135 42)">
+    <rect width="270" height="84" rx="10" class="paper"/>
+    <rect width="270" height="84" rx="10" fill="url(#tealHatch)" opacity="0.95"/>
+    <text x="135" y="36" text-anchor="middle" class="label">Goal Pose</text>
+    <text x="135" y="61" text-anchor="middle" class="small">target x, y, yaw</text>
   </g>
 
-  <g transform="translate(445 150)">
-    <rect width="300" height="230" rx="24" class="card"/>
-    <circle cx="52" cy="48" r="25" fill="url(#green)"/>
-    <text x="52" y="55" text-anchor="middle" class="topic">02</text>
-    <text x="96" y="47" class="h">V-PRM Planner</text>
-    <text x="96" y="74" class="tiny">topology-aware reference path</text>
-    <rect x="52" y="112" width="196" height="82" rx="12" class="node"/>
-    <circle cx="78" cy="162" r="9" fill="#2563eb"/>
-    <circle cx="225" cy="126" r="11" fill="#ffd84d" stroke="#8a6700" stroke-width="2"/>
-    <rect x="128" y="132" width="28" height="40" rx="5" class="obs"/>
-    <path d="M78 162 C118 120 161 198 225 126" class="path"/>
+  <g transform="translate(82 286) rotate(1 120 100)">
+    <rect width="250" height="192" rx="12" class="paper"/>
+    <rect width="250" height="192" rx="12" fill="url(#yellowHatch)" opacity="0.7"/>
+    <text x="125" y="36" text-anchor="middle" class="label">UGV Sensors</text>
+    <text x="125" y="62" text-anchor="middle" class="small">/scan + /odom</text>
+    <g transform="translate(66 85)">
+      <path d="M50 40 L25 55 L52 71 L80 53 Z" fill="#3b82f6" stroke="#1e2a38" stroke-width="2"/>
+      <circle cx="48" cy="51" r="4" fill="#111827"/>
+      <circle cx="80" cy="55" r="5" fill="#111827"/>
+      <line x1="54" y1="42" x2="8" y2="17" class="lidar"/>
+      <line x1="54" y1="42" x2="1" y2="41" class="lidar"/>
+      <line x1="54" y1="42" x2="11" y2="68" class="lidar"/>
+      <line x1="54" y1="42" x2="42" y2="2" class="lidar"/>
+      <line x1="54" y1="42" x2="95" y2="9" class="lidar"/>
+    </g>
+    <text x="125" y="164" text-anchor="middle" class="tiny">range points and robot state</text>
   </g>
 
-  <g transform="translate(830 150)">
-    <rect width="300" height="230" rx="24" class="card"/>
-    <circle cx="52" cy="48" r="25" fill="url(#orange)"/>
-    <text x="52" y="55" text-anchor="middle" class="topic">03</text>
-    <text x="96" y="47" class="h">Obstacle Model</text>
-    <text x="96" y="74" class="tiny">ellipsoid or half-space</text>
-    <rect x="50" y="110" width="80" height="52" rx="16" fill="#fff7ed" stroke="#fb923c" stroke-width="2"/>
-    <text x="90" y="142" text-anchor="middle" class="txt">soft</text>
-    <rect x="168" y="110" width="80" height="52" rx="16" fill="#eef2ff" stroke="#818cf8" stroke-width="2"/>
-    <text x="208" y="142" text-anchor="middle" class="txt">hard</text>
-    <text x="150" y="194" text-anchor="middle" class="tiny">N_ELL=12 or NH=12</text>
+  <g transform="translate(425 252) rotate(-1.5 130 125)">
+    <rect width="270" height="244" rx="12" class="paper"/>
+    <rect width="270" height="244" rx="12" fill="url(#roseHatch)" opacity="0.74"/>
+    <text x="135" y="36" text-anchor="middle" class="label">Local Map</text>
+    <text x="135" y="62" text-anchor="middle" class="small">obstacle extraction</text>
+    <rect x="38" y="88" width="78" height="50" rx="5" fill="#fff7ed" stroke="#222831" stroke-width="1.8"/>
+    <text x="77" y="118" text-anchor="middle" class="tiny">filter</text>
+    <rect x="154" y="88" width="78" height="50" rx="5" fill="#fff7ed" stroke="#222831" stroke-width="1.8"/>
+    <text x="193" y="111" text-anchor="middle" class="tiny">merge</text>
+    <text x="193" y="128" text-anchor="middle" class="tiny">circles</text>
+    <path d="M116 113 C130 113 140 113 154 113" class="arrow"/>
+    <circle cx="76" cy="178" r="16" fill="#d6a15d" stroke="#6f4a22" stroke-width="2"/>
+    <circle cx="135" cy="177" r="23" fill="#d6a15d" stroke="#6f4a22" stroke-width="2"/>
+    <circle cx="196" cy="178" r="14" fill="#d6a15d" stroke="#6f4a22" stroke-width="2"/>
   </g>
 
-  <g transform="translate(1190 170)">
-    <rect width="210" height="190" rx="24" class="card"/>
-    <circle cx="50" cy="46" r="25" fill="url(#blue)"/>
-    <text x="50" y="53" text-anchor="middle" class="topic">04</text>
-    <text x="94" y="45" class="h">MPC</text>
-    <text x="94" y="72" class="tiny">acados SQP-RTI</text>
-    <path d="M56 136 C96 84 142 188 178 118" class="traj"/>
-    <circle cx="56" cy="136" r="10" class="robot"/>
-    <path d="M174 118 L190 110" class="arrow"/>
+  <g transform="translate(790 244) rotate(1.2 152 132)">
+    <rect width="304" height="256" rx="12" class="paper"/>
+    <rect width="304" height="256" rx="12" fill="url(#blueHatch)" opacity="0.72"/>
+    <text x="152" y="36" text-anchor="middle" class="label">V-PRM Planner</text>
+    <text x="152" y="62" text-anchor="middle" class="small">topology-aware path</text>
+    <rect x="44" y="91" width="216" height="124" rx="8" fill="#ffffff" stroke="#222831" stroke-width="1.8"/>
+    <circle cx="80" cy="178" r="7" fill="#2563eb"/>
+    <circle cx="228" cy="116" r="9" fill="#ffd166" stroke="#7c5900" stroke-width="2"/>
+    <rect x="128" y="125" width="35" height="45" fill="#d6a15d" stroke="#6f4a22" stroke-width="2"/>
+    <path d="M80 178 C104 126 135 191 170 142 C188 116 206 120 228 116" class="path"/>
+    <path d="M72 126 L118 102 L161 138 L206 92 L236 147 M86 182 L132 188 L177 168 L229 116" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 5"/>
+    <text x="152" y="238" text-anchor="middle" class="tiny">reference path + local goal</text>
   </g>
 
-  <path d="M360 265 C394 265 410 265 445 265" class="arrow"/>
-  <path d="M745 265 C782 265 793 265 830 265" class="arrow"/>
-  <path d="M1130 265 C1160 265 1166 265 1190 265" class="arrow"/>
-
-  <g transform="translate(210 470)">
-    <rect width="250" height="120" rx="22" class="card"/>
-    <text x="125" y="42" text-anchor="middle" class="h">Reference Path</text>
-    <text x="125" y="75" text-anchor="middle" class="txt">/reference_path</text>
-    <path d="M50 94 C92 72 140 105 200 56" class="path"/>
-  </g>
-  <g transform="translate(628 470)">
-    <rect width="250" height="120" rx="22" class="card"/>
-    <text x="125" y="42" text-anchor="middle" class="h">Warm Start</text>
-    <text x="125" y="75" text-anchor="middle" class="txt">shift + radial projection</text>
-  </g>
-  <g transform="translate(1046 470)">
-    <rect width="250" height="120" rx="22" class="card"/>
-    <text x="125" y="42" text-anchor="middle" class="h">Command</text>
-    <text x="125" y="75" text-anchor="middle" class="txt">/cmd_vel</text>
-    <text x="125" y="100" text-anchor="middle" class="tiny">stop at goal radius</text>
+  <g transform="translate(850 565) rotate(-1.1 150 75)">
+    <rect width="300" height="128" rx="12" class="paper"/>
+    <rect width="300" height="128" rx="12" fill="url(#tealHatch)" opacity="0.72"/>
+    <text x="150" y="36" text-anchor="middle" class="label">Contouring MPC</text>
+    <text x="150" y="61" text-anchor="middle" class="small">acados SQP-RTI</text>
+    <text x="150" y="88" text-anchor="middle" class="tiny">track path, avoid obstacles, stop at goal</text>
   </g>
 
-  <path d="M360 470 C390 420 430 380 500 350" class="soft"/>
-  <path d="M745 380 C710 415 700 440 710 470" class="soft"/>
-  <path d="M980 380 C1015 420 1070 440 1160 470" class="soft"/>
-  <path d="M460 530 C520 530 568 530 628 530" class="arrow"/>
-  <path d="M878 530 C938 530 986 530 1046 530" class="arrow"/>
+  <g transform="translate(442 575) rotate(1.3 145 68)">
+    <rect width="290" height="122" rx="12" class="paper"/>
+    <rect width="290" height="122" rx="12" fill="url(#yellowHatch)" opacity="0.72"/>
+    <text x="145" y="34" text-anchor="middle" class="label">Obstacle Constraints</text>
+    <text x="145" y="62" text-anchor="middle" class="small">soft ellipsoid / hard half-space</text>
+    <text x="145" y="91" text-anchor="middle" class="tiny">switchable in config</text>
+  </g>
 
-  <rect x="345" y="632" width="810" height="42" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-  <text x="750" y="658" text-anchor="middle" class="txt">Classic stack: V-PRM plans globally, contouring MPC tracks locally, obstacles enter as soft ellipsoids or hard half-spaces.</text>
+  <g transform="translate(1100 304) rotate(1.5 58 78)">
+    <rect width="120" height="156" rx="12" class="paper"/>
+    <text x="60" y="32" text-anchor="middle" class="label">UGV</text>
+    <path d="M59 65 L29 83 L60 101 L92 81 Z" fill="#3b82f6" stroke="#1e2a38" stroke-width="2.4"/>
+    <circle cx="54" cy="81" r="5" fill="#111827"/>
+    <circle cx="89" cy="83" r="5" fill="#111827"/>
+    <text x="60" y="132" text-anchor="middle" class="tiny">/cmd_vel</text>
+  </g>
+
+  <path d="M640 200 C640 225 625 230 592 250" class="arrow"/>
+  <path d="M640 200 C708 227 765 230 830 265" class="arrow"/>
+  <path d="M332 378 C365 378 390 378 425 378" class="arrow"/>
+  <path d="M695 374 C730 374 755 374 790 374" class="arrow"/>
+  <path d="M943 500 C940 530 946 548 962 565" class="arrow"/>
+  <path d="M697 497 C670 533 652 553 635 575" class="dash"/>
+  <path d="M732 636 C775 636 807 636 850 636" class="arrow"/>
+  <path d="M1094 638 C1150 610 1180 532 1162 460" class="arrow"/>
+  <path d="M1100 378 C1065 355 1035 340 1094 330" class="dash"/>
+  <path d="M1102 433 C1002 524 823 546 688 496" class="dash"/>
+
+  <g transform="translate(353 334) rotate(-0.8)">
+    <path d="M0 0 H66 L83 16 L66 32 H0 Z" fill="#f4f0ff" stroke="#222831" stroke-width="1.7"/>
+    <text x="34" y="21" text-anchor="middle" class="tiny">scan</text>
+  </g>
+  <g transform="translate(704 337) rotate(0.8)">
+    <path d="M0 0 H72 L90 16 L72 32 H0 Z" fill="#eef8f1" stroke="#222831" stroke-width="1.7"/>
+    <text x="39" y="21" text-anchor="middle" class="tiny">map</text>
+  </g>
+  <g transform="translate(754 607) rotate(-1)">
+    <path d="M0 0 H80 L99 16 L80 32 H0 Z" fill="#fff7e6" stroke="#222831" stroke-width="1.7"/>
+    <text x="43" y="21" text-anchor="middle" class="tiny">bounds</text>
+  </g>
+  <g transform="translate(1132 525) rotate(-15)">
+    <path d="M0 0 H84 L104 16 L84 32 H0 Z" fill="#eaf3ff" stroke="#222831" stroke-width="1.7"/>
+    <text x="46" y="21" text-anchor="middle" class="tiny">control</text>
+  </g>
+
+  <text x="640" y="756" text-anchor="middle" class="caption">Traditional route: lidar and odometry build the local obstacle model, V-PRM gives the reference path, and contouring MPC outputs safe velocity commands.</text>
 </svg>
