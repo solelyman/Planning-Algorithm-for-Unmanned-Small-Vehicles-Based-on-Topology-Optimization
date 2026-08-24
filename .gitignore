@@ -12,6 +12,15 @@ __pycache__/
 
 # RL training artifacts (RL/)
 RL/models/
+RL/fishbot_mujoco_sac/models/
+RL/fishbot_mujoco_sac/runs_dyn/
+RL/fishbot_mujoco_sac/logs/
+RL/fishbot_mujoco_sac/mujoco_env/
+*.zip
+*.npz
+*.pt
+*.pth
+*.onnx
 
 # Editors / OS
 .vscode/

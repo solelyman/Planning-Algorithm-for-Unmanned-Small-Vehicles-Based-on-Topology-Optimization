@@ -1,0 +1,14 @@
+{
+  "bc": {
+    "source": "/home/lu/RL/fishbot_mujoco/runs_dyn/mixed_datasets/bc_stable_plus_new_teacher.npz",
+    "samples": 98510
+  },
+  "transitions": {
+    "arrived": 229,
+    "collision": 0,
+    "timeout": 59,
+    "kept_segments": 229,
+    "dropped_segments": 59,
+    "samples": 100414
+  }
+}

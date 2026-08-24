@@ -1,5 +1,70 @@
-# Fishbot RL — 端到端激光导航 · PPO
+# Fishbot RL — MuJoCo Navigation
 Reinforcement Learning Branch of the Topology-Optimization Planning Project
+
+## SAC-MuJoCo Continuous-Goal Demo
+
+This folder now includes a true-dynamics MuJoCo SAC navigation demo for a
+tracked UGV. The current robust demo uses a SAC policy with a lightweight
+heading guard for continuous-goal validation.
+
+![Figure 2. SAC MuJoCo workflow](docs/images/sac_mujoco_pipeline.svg)
+
+### Current SAC Result
+
+Selected local checkpoint:
+
+```text
+/home/lu/RL/fishbot_mujoco/runs_dyn/sac_20260825_010443/best_model.zip
+```
+
+The checkpoint is about 324 MB, so it is not committed to Git. Publish it with
+Git LFS or a GitHub Release asset if the trained weight needs to be shared.
+
+| Policy | Safety layer | Seeds | Result |
+| --- | --- | --- | --- |
+| SAC checkpoint | none | 2, 7, 8, 10 | partially successful; seed 2 and 7 can still collide |
+| SAC checkpoint | heading guard | 2, 7, 8, 10 | 8/8 goals, 0 collision in tested seeds |
+| SAC checkpoint | heading guard | seed 2 GUI | 10/10 goals, 0 collision, 0 timeout |
+
+![SAC continuous-goal demo](docs/images/sac_multigoal_seed2.gif)
+
+Training curve:
+
+![SAC training curve](docs/results/sac_curve.png)
+
+### Run The SAC Demo
+
+```bash
+cd RL/fishbot_mujoco_sac
+python3.12 -m venv mujoco_env
+source mujoco_env/bin/activate
+pip install torch --index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements.txt
+```
+
+```bash
+PYTHONUNBUFFERED=1 PYTHONPYCACHEPREFIX=/tmp/fishbot_pycache ./mujoco_env/bin/python scripts/view_multigoal_dyn.py \
+  --model runs_dyn/sac_20260825_010443/best_model.zip \
+  --stage 3 --scene boxes \
+  --goals 10 \
+  --seed 2 \
+  --sleep 0.03 \
+  --goal-radius 0.35 \
+  --max-steps-per-goal 900 \
+  --heading-guard
+```
+
+The heading guard is not Visibility-PRM and does not change the planned path.
+It only caps forward speed when the local guide direction is far from the robot
+heading, which prevents high-throttle large-radius turns during continuous goal
+switches.
+
+See [`docs/MODEL_CARD.md`](docs/MODEL_CARD.md) for the checkpoint note and
+validation details. The SAC code is in [`fishbot_mujoco_sac/`](fishbot_mujoco_sac/).
+
+---
+
+## PPO Baseline / Original RL Notes
 
 Fishbot 两轮差速小车（ESP32 + YDLidar X2）的**端到端激光导航**分支，与主仓库的
 V-PRM + Contouring MPC 经典规划路线形成对照：**同一台车、同一个 SquareWorld2 场景，

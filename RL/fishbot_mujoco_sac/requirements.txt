@@ -1,0 +1,18 @@
+# FishBot MuJoCo RL 训练环境依赖（已在本机验证）
+# 安装: python3.12 -m venv mujoco_env && mujoco_env/bin/pip install -r requirements.txt
+# 注: torch 需要从 https://download.pytorch.org/whl/cu128 安装匹配 CUDA 的版本
+
+# --- 核心训练 ---
+mujoco==3.11.0
+gymnasium==1.3.0
+stable-baselines3==2.9.0
+torch>=2.0.0
+numpy==2.5.1
+cloudpickle==3.1.2
+
+# --- 训练监控 ---
+tensorboard>=2.14.0
+
+# --- 可视化/导出 ---
+matplotlib==3.11.1
+opencv-python>=4.8.0

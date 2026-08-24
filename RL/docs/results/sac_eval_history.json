@@ -1,0 +1,58 @@
+[
+  {
+    "episodes": 10,
+    "arrived_rate": 0.8,
+    "collision_rate": 0.0,
+    "timeout_rate": 0.2,
+    "mean_steps": 661.9,
+    "mean_reward": 238.32271931509544,
+    "mean_dist": 0.37173246704678553,
+    "mean_min_laser": 1.303431010246277,
+    "round": 1,
+    "timesteps": 7000,
+    "bc_loss": 0.0017145485816272507,
+    "selection_score": 0.76
+  },
+  {
+    "episodes": 10,
+    "arrived_rate": 0.5,
+    "collision_rate": 0.0,
+    "timeout_rate": 0.5,
+    "mean_steps": 673.5,
+    "mean_reward": 193.33856578364856,
+    "mean_dist": 0.5257255952510527,
+    "mean_min_laser": 1.3346115112304688,
+    "round": 2,
+    "timesteps": 14000,
+    "bc_loss": 0.0015676206395806927,
+    "selection_score": 0.4
+  },
+  {
+    "episodes": 10,
+    "arrived_rate": 0.8,
+    "collision_rate": 0.0,
+    "timeout_rate": 0.2,
+    "mean_steps": 659.1,
+    "mean_reward": 251.7567115931046,
+    "mean_dist": 0.5039655890006294,
+    "mean_min_laser": 1.3990170300006866,
+    "round": 3,
+    "timesteps": 21000,
+    "bc_loss": 0.0016873705477111157,
+    "selection_score": 0.76
+  },
+  {
+    "episodes": 10,
+    "arrived_rate": 0.8,
+    "collision_rate": 0.0,
+    "timeout_rate": 0.2,
+    "mean_steps": 644.4,
+    "mean_reward": 235.583867185608,
+    "mean_dist": 0.38547142900507847,
+    "mean_min_laser": 1.298219871520996,
+    "round": 4,
+    "timesteps": 28000,
+    "bc_loss": 0.0017496089742354895,
+    "selection_score": 0.76
+  }
+]

@@ -25,7 +25,17 @@ formulations are implemented and switchable by one parameter:
 
 > **Two lines in one repo** — this repo contains **two competing navigation stacks**:
 > - `multi_usv_planner/` — classic **V-PRM + Contouring MPC** (model-based, ROS 2 / C++)
-> - [`RL/`](RL/README.md) — **end-to-end PPO** laser navigation (learning-based, MuJoCo, BC-pretrain + PPO finetune)
+> - [`RL/`](RL/README.md) — **RL navigation** (MuJoCo PPO baseline + SAC continuous-goal demo)
+
+### Latest RL Demo / 最新 RL 演示
+
+The `RL/` folder now includes a tracked-UGV **SAC + MuJoCo** navigation demo.
+The current public demo uses a SAC policy with a lightweight heading guard for
+continuous-goal validation.
+
+![Figure 2. SAC MuJoCo workflow](RL/docs/images/sac_mujoco_pipeline.svg)
+
+![SAC continuous-goal demo](RL/docs/images/sac_multigoal_seed2.gif)
 
 | Test | Constraint formulation | `use_linear_constraints` | Remark |
 |------|------------------------|--------------------------|--------|

@@ -1,0 +1,102 @@
+<mujoco model="tracked_nav">
+  <compiler angle="degree" coordinate="local"/>
+  <option timestep="0.01" gravity="0 0 -9.81" integrator="Euler" cone="elliptic" iterations="80">
+    <flag contact="enable"/>
+  </option>
+
+  <default>
+    <joint damping="0.2" armature="0.01"/>
+    <geom condim="6" friction="1.2 0.04 0.002" solref="0.02 1" solimp="0.8 0.9 0.001"/>
+    <motor ctrllimited="true"/>
+  </default>
+
+  <asset>
+    <material name="floor_mat" rgba="0.24 0.34 0.28 1"/>
+    <material name="wall_mat" rgba="0.62 0.62 0.60 1"/>
+    <material name="obs_mat" rgba="0.82 0.54 0.22 1"/>
+    <material name="track_mat" rgba="0.08 0.08 0.08 1"/>
+    <material name="body_mat" rgba="0.12 0.22 0.52 1"/>
+    <material name="sensor_mat" rgba="0.02 0.02 0.02 1"/>
+    <material name="goal_mat" rgba="1.0 0.84 0.0 1"/>
+    <material name="guide_mat" rgba="0.0 0.95 0.95 0.9"/>
+    <material name="path_mat" rgba="0.0 0.85 0.16 0.75"/>
+    <material name="ray_mat" rgba="1.0 0.28 0.02 0.45"/>
+  </asset>
+
+  <worldbody>
+    <light name="top_light" pos="0 0 9" dir="0 0 -1" diffuse="0.95 0.95 0.95" ambient="0.55 0.55 0.55"/>
+    <light name="side_light" pos="-6 -4 5" dir="1 1 -1" diffuse="0.45 0.45 0.45" ambient="0.20 0.20 0.20"/>
+    <camera name="top_view" pos="0 -8 8" xyaxes="1 0 0 0 0.707 0.707" mode="fixed"/>
+    <camera name="robot_view" pos="-0.75 0 0.55" xyaxes="0 -1 0 0.35 0 0.94" mode="trackcom"/>
+
+    <geom name="ground" type="plane" size="7 7 0.1" material="floor_mat" friction="1.2 0.02 0.001"/>
+    <geom name="goal_marker" type="sphere" size="0.16" pos="0 0 0.16" material="goal_mat" contype="0" conaffinity="0"/>
+
+    <geom name="wall_n" type="box" size="6.0 0.12 0.35" pos="0 5.0 0.35" material="wall_mat"/>
+    <geom name="wall_s" type="box" size="6.0 0.12 0.35" pos="0 -5.0 0.35" material="wall_mat"/>
+    <geom name="wall_e" type="box" size="0.12 5.0 0.35" pos="5.0 0 0.35" material="wall_mat"/>
+    <geom name="wall_w" type="box" size="0.12 5.0 0.35" pos="-5.0 0 0.35" material="wall_mat"/>
+
+    <body name="obsb_0" pos="30 30 0.3"><geom name="obs_0" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_1" pos="31 30 0.3"><geom name="obs_1" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_2" pos="32 30 0.3"><geom name="obs_2" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_3" pos="33 30 0.3"><geom name="obs_3" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_4" pos="34 30 0.3"><geom name="obs_4" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_5" pos="35 30 0.3"><geom name="obs_5" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_6" pos="36 30 0.3"><geom name="obs_6" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_7" pos="37 30 0.3"><geom name="obs_7" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_8" pos="38 30 0.3"><geom name="obs_8" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_9" pos="39 30 0.3"><geom name="obs_9" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_10" pos="40 30 0.3"><geom name="obs_10" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+    <body name="obsb_11" pos="41 30 0.3"><geom name="obs_11" type="box" size="0.3 0.3 0.3" material="obs_mat"/></body>
+
+    <body name="chassis" pos="0 0 0.06">
+      <joint name="root_x" type="slide" axis="1 0 0" damping="0.8"/>
+      <joint name="root_y" type="slide" axis="0 1 0" damping="0.8"/>
+      <joint name="root_yaw" type="hinge" axis="0 0 1" damping="0.6"/>
+      <geom name="base_link" type="box" size="0.23 0.18 0.08" pos="0 0 0.04" mass="2.6" material="body_mat" friction="0.7 0.03 0.001"/>
+      <geom name="skid_pad" type="box" size="0.22 0.17 0.012" pos="0 0 -0.045" mass="0.15" rgba="0.04 0.04 0.04 1" friction="1.8 0.05 0.002"/>
+      <geom name="front_bumper" type="box" size="0.035 0.17 0.055" pos="0.25 0 0.035" mass="0.12" rgba="0.10 0.10 0.12 1"/>
+      <geom name="lidar" type="cylinder" size="0.035 0.025" pos="0.08 0 0.15" mass="0.04" material="sensor_mat"/>
+      <camera name="front_depth_proxy" pos="0.18 0 0.18" xyaxes="0 -1 0 0 0 1" mode="fixed"/>
+
+      <body name="wheel_fl" pos="0.16 0.20 0.0" quat="0.7071068 0.7071068 0 0">
+        <joint name="wheel_fl_joint" axis="0 0 1" type="hinge"/>
+        <geom name="wheel_fl_geom" type="cylinder" size="0.055 0.035" mass="0.18" material="track_mat" friction="2.2 0.12 0.01"/>
+      </body>
+      <body name="wheel_rl" pos="-0.16 0.20 0.0" quat="0.7071068 0.7071068 0 0">
+        <joint name="wheel_rl_joint" axis="0 0 1" type="hinge"/>
+        <geom name="wheel_rl_geom" type="cylinder" size="0.055 0.035" mass="0.18" material="track_mat" friction="2.2 0.12 0.01"/>
+      </body>
+      <body name="wheel_fr" pos="0.16 -0.20 0.0" quat="0.7071068 0.7071068 0 0">
+        <joint name="wheel_fr_joint" axis="0 0 1" type="hinge"/>
+        <geom name="wheel_fr_geom" type="cylinder" size="0.055 0.035" mass="0.18" material="track_mat" friction="2.2 0.12 0.01"/>
+      </body>
+      <body name="wheel_rr" pos="-0.16 -0.20 0.0" quat="0.7071068 0.7071068 0 0">
+        <joint name="wheel_rr_joint" axis="0 0 1" type="hinge"/>
+        <geom name="wheel_rr_geom" type="cylinder" size="0.055 0.035" mass="0.18" material="track_mat" friction="2.2 0.12 0.01"/>
+      </body>
+    </body>
+
+    <geom name="guide" type="sphere" size="0.055" pos="50 50 0.04" material="guide_mat" contype="0" conaffinity="0"/>
+    <geom name="path_0" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_1" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_2" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_3" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_4" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_5" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_6" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_7" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_8" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_9" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_10" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+    <geom name="path_11" type="sphere" size="0.035" pos="50 50 0.03" material="path_mat" contype="0" conaffinity="0"/>
+  </worldbody>
+
+  <actuator>
+    <velocity name="motor_fl" joint="wheel_fl_joint" kv="0.25" ctrlrange="-14 14"/>
+    <velocity name="motor_rl" joint="wheel_rl_joint" kv="0.25" ctrlrange="-14 14"/>
+    <velocity name="motor_fr" joint="wheel_fr_joint" kv="0.25" ctrlrange="-14 14"/>
+    <velocity name="motor_rr" joint="wheel_rr_joint" kv="0.25" ctrlrange="-14 14"/>
+  </actuator>
+</mujoco>
