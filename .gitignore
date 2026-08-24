@@ -21,6 +21,7 @@ RL/fishbot_mujoco_sac/mujoco_env/
 *.pt
 *.pth
 *.onnx
+MUJOCO_LOG.TXT
 
 # Editors / OS
 .vscode/

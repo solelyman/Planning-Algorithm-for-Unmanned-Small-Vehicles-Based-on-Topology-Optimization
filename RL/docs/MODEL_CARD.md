@@ -3,7 +3,7 @@
 ## Selected Local Checkpoint
 
 ```text
-/home/lu/RL/fishbot_mujoco/runs_dyn/sac_20260825_010443/best_model.zip
+fishbot_mujoco_sac/runs_dyn/sac_20260825_010443/best_model.zip
 ```
 
 This SAC checkpoint is approximately 324 MB and is intentionally not committed

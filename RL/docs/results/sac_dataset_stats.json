@@ -1,6 +1,6 @@
 {
   "bc": {
-    "source": "/home/lu/RL/fishbot_mujoco/runs_dyn/mixed_datasets/bc_stable_plus_new_teacher.npz",
+    "source": "fishbot_mujoco_sac/runs_dyn/mixed_datasets/bc_stable_plus_new_teacher.npz",
     "samples": 98510
   },
   "transitions": {

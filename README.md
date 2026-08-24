@@ -1,162 +1,93 @@
-# 基于拓扑优化的无人小型车辆规划算法 · Contouring MPC
+# 基于拓扑优化的无人小型车辆规划算法
 
 Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
-（UGV 两轮差速小车 · MPC 路径跟踪与避障）
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 ![ROS 2](https://img.shields.io/badge/ROS_2-Humble-blue)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus)
 ![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python)
-![acados](https://img.shields.io/badge/acados-v1.4-009688)
-![V-PRM](https://img.shields.io/badge/Planner-V--PRM-orange)
-![PPO](https://img.shields.io/badge/RL-PPO-purple)
 ![MuJoCo](https://img.shields.io/badge/Sim-MuJoCo-black)
+![SAC](https://img.shields.io/badge/RL-SAC-6A5ACD)
 
----
+本仓库包含两条小型无人车导航路线：
 
-> **English** | 中文见下（English README, Chinese below）
+- `multi_ugv_planner/`：V-PRM 全局规划 + Contouring MPC 路径跟踪与避障
+- [`RL/`](RL/README.md)：MuJoCo 动力学环境下的强化学习导航验证
 
-A **model predictive control (MPC) path-tracking and obstacle-avoidance stack** for the
-**UGV** two-wheel differential-drive robot (ESP32 + YDLidar X2), running on ROS 2 Humble.
+## MuJoCo 3D Demo
 
-It couples a **V-PRM global planner** (with local-goal approach / arrival detection) with a
-real-time **contouring MPC** solved by **acados** (SQP-RTI + HPIPM). Two obstacle constraint
-formulations are implemented and switchable by one parameter:
-
-> **Two lines in one repo** — this repo contains **two competing navigation stacks**:
-> - `multi_usv_planner/` — classic **V-PRM + Contouring MPC** (model-based, ROS 2 / C++)
-> - [`RL/`](RL/README.md) — **RL navigation** (MuJoCo PPO baseline + SAC continuous-goal demo)
-
-### Latest RL Demo / 最新 RL 演示
-
-The `RL/` folder now includes a tracked-UGV **SAC + MuJoCo** navigation demo.
-The current public demo uses a SAC policy with a lightweight heading guard for
-continuous-goal validation.
-
-![Figure 2. SAC MuJoCo workflow](RL/docs/images/sac_mujoco_pipeline.svg)
+当前 RL 展示使用履带式 UGV、MuJoCo 碰撞动力学、激光观测和连续目标切换。演示策略为 SAC checkpoint 加轻量转向保护，主要用于验证策略能否在同一场景中连续完成多个目标点。
 
 ![MuJoCo 3D SAC demo](RL/docs/images/sac_mujoco_3d_seed2.gif)
 
 ![SAC continuous-goal demo](RL/docs/images/sac_multigoal_seed2.gif)
 
-| Test | Constraint formulation | `use_linear_constraints` | Remark |
-|------|------------------------|--------------------------|--------|
-| **A** | **Ellipsoid soft penalty** — per-stage circle `(x-ox)²+(y-oy)²-r²` penalized in the cost | `false` | DecompUtil-style, easy to warm start, may squeeze the corridor when many lidar points hit one obstacle |
-| **B** | **Hard linearized half-space** — `con_h_expr`: `h = a1·x + a2·y - b ≤ 0` (12 half-spaces/stage), obstacle linearized at the **warm-start anchor** (previous solution shifted + radial projection) | `true` | mpc_planner-style, no QP infeasibility from overlapping ellipsoids; keeps hard safety guarantees |
+![SAC MuJoCo workflow](RL/docs/images/sac_mujoco_pipeline.svg)
 
-Both tests are validated to **circle around an obstacle, run the approach straight line and stop at the goal**.
+## Project Layout
 
----
+```text
+.
+├── multi_ugv_planner/          # ROS 2 Python nodes: V-PRM, fake odom, fake scan
+├── include/multi_ugv_planner/  # MPC solver headers
+├── src/                        # Contouring MPC and planner node
+├── config/ugv_params.yaml      # Main planner parameters
+├── launch/ugv_mpc.launch.py    # ROS 2 launch file
+├── docs/images/                # Main planner figures
+└── RL/                         # MuJoCo RL navigation branch
+```
 
-## 中文简介
+## Classic Planner
 
-为 **UGV 两轮差速小车**（ESP32 主控 + YDLidar X2 激光雷达，ROS 2 Humble / micro-ROS）实现的
-**MPC 路径跟踪与避障**完整链路：
+The classic stack is a ROS 2 Humble navigation pipeline for a differential-drive UGV. It combines an online V-PRM planner with an acados-based contouring MPC controller.
 
-- **V-PRM 全局规划**：基于雷达点云在线构建 PRM 绕行路径，带 0.35 m 障碍安全余量；
-  终点直线区（距目标 < 1.5 m）直接发直线、不跑 PRM，并对短路径延长覆盖 MPC 预测时域。
-- **Contouring MPC**：acados SQP-RTI 实时求解（N=10，dt=0.4 s），`warm start = 上一帧解 shift + 障碍径向投影`。
-- **两种障碍约束，一个参数切换**（见上表 Test A / Test B）：
-  - A：椭球软罚（N_ELL=12 椭球，代价项）；
-  - B：线性半空间硬约束（`con_h_expr`，NH=12/阶段，障碍在 warm-start 锚点处线性化）。
-- **到达检测**：距目标 < 0.35 m 停车，防止冲过目标后反向规划导致倒车。
-
-## Features / 特性
-
-- **Two obstacle constraint modes** (soft ellipsoid vs. hard linearized half-space), one-parameter switch
-- **acados SQP-RTI** with HPIPM, `PARTIAL_CONDENSING_HPIPM`, multi-RTI iterations
-- **Warm start from previous solution + obstacle radial projection** → avoids QP infeasibility / MINSTEP
-- **Overlapping-ellipsoid merging** (laser sweep of one physical obstacle → merged circle)
-- **V-PRM global planner** with flip suppression, approach segment, arrival detection
-- **Pure ROS 2 Humble** C++ node, no DecompUtil / no multi-body legacy code
-
-## System Architecture / 系统架构
-
-![Figure 2. V-PRM + Contouring MPC architecture](docs/images/mpc_architecture_figure2.svg)
-
-## Quick Start / 快速开始
-
-### Dependencies / 依赖
-
-- ROS 2 Humble
-- [acados](https://github.com/acados/acados) (v1.4, with BLASFEO/HPIPM), installed to `/home/<user>/.local/share/acados`
-- Eigen3
+![V-PRM + Contouring MPC architecture](docs/images/mpc_architecture_figure2.svg)
 
 ```bash
-# 1. Build (colcon)
-cd <your_ws>/src
-cp -r ugv_mpc_planner multi_ugv_planner
-cd <your_ws>
+cd <ros2_ws>/src
+cp -r <this_repo> multi_ugv_planner
+cd <ros2_ws>
 source /opt/ros/humble/setup.bash
 colcon build --packages-select multi_ugv_planner
-
-# 2. Simulation with fake odom/scan (no hardware)
 source install/setup.bash
-ros2 run multi_ugv_planner fake_odom.py &   # integrate /cmd_vel -> /odom at 50 Hz
-ros2 run multi_ugv_planner fake_scan.py &   # fixed obstacle at (1.0, 0.0) r=0.15
+
+ros2 run multi_ugv_planner fake_odom.py &
+ros2 run multi_ugv_planner fake_scan.py &
 ros2 launch multi_ugv_planner ugv_mpc.launch.py
 ```
 
-> `ugv_mpc.launch.py` starts the V-PRM node and the MPC node with
-> `config/ugv_params.yaml`. It references `scripts/ugv_vprm_node.py`
-> (in this repo under `multi_ugv_planner/`).
-
-### Test A vs Test B / A/B 测试切换
-
-Edit `config/ugv_params.yaml`:
+Obstacle handling can be switched in `config/ugv_params.yaml`:
 
 ```yaml
 mpc:
-  use_linear_constraints: true    # false -> Test A (soft ellipsoid), true -> Test B (hard linearized)
+  use_linear_constraints: true
 ```
 
-### Real robot / 真机（UGV）
+`true` uses linearized hard half-space constraints. `false` uses soft ellipsoid penalties.
 
-- 上位机通过 UDP 8888 连接 micro-ROS Agent（Humble 固件版本必须匹配）；
-- 雷达通过 TCP 8889 转发到 `/scan`；
-- 话题：`/odom`(nav_msgs/Odometry)、`/scan`(sensor_msgs/LaserScan)、`/cmd_vel`(geometry_msgs/Twist)。
+## RL Navigation
 
-## Key Implementation Notes / 关键实现
+The [`RL/`](RL/README.md) folder keeps the earlier PPO baseline and adds the current MuJoCo SAC experiment. The public files include the environment, training scripts, evaluation scripts, curves, and demo media. Large trained checkpoints are not committed to the repository.
 
-- **Warm start**（Test B 能解的根基）：`solve()` 先算 warm-start 轨迹——k 步用上一帧第 k+1 步解（速度下限 0.3 m/s），
-  再按各阶段椭球把轨迹点径向推出障碍（+1e-3）；**锚点 = warm-start 轨迹点而非参考路径点**，
-  避免"第一步跳到障碍另一侧"的动力学不可行。
-- **重叠椭球合并**：激光把同一障碍扫成多个相邻点（每个 r=0.4）会压死可行域导致 QP INFEASIBLE；
-  中心距 < 0.5·(r1+r2) 则合并（中心取中点、半径取外切覆盖、dist 取 min）。
-- **蠕行修复**：`acados_weight_velocity: 3.0`（速度跟踪主导）+ V-PRM `margin: 0.3`（绕行路径不过度外扩）。
-- **RTI_ITERATIONS=6**：2 次从低速度 warm start 收敛不到最优（会蠕行），6 次让非线性充分收敛。
+```bash
+cd RL/fishbot_mujoco_sac
+python3.12 -m venv mujoco_env
+source mujoco_env/bin/activate
+pip install torch --index-url https://download.pytorch.org/whl/cu128
+pip install -r requirements.txt
 
-## 正在推进 / Roadmap
-
-- **RL 导航（已加入）**：`RL/` 目录保留原端到端 PPO 激光导航基线，并新增
-  **SAC + MuJoCo 连续目标验证**。当前 SAC demo 使用 72 束 lidar、局部 guide、里程计状态输入，
-  在 MuJoCo 真实碰撞动力学中连续切换目标；公开展示版本使用轻量 heading guard 做大角度掉头限速。
-  详见 [`RL/README.md`](RL/README.md)。
-
-![MuJoCo 3D SAC demo](RL/docs/images/sac_mujoco_3d_seed2.gif)
-
-## Directory Layout / 目录结构
-
+PYTHONUNBUFFERED=1 PYTHONPYCACHEPREFIX=/tmp/fishbot_pycache ./mujoco_env/bin/python scripts/view_multigoal_dyn.py \
+  --model runs_dyn/sac_20260825_010443/best_model.zip \
+  --stage 3 --scene boxes \
+  --goals 10 \
+  --seed 2 \
+  --sleep 0.03 \
+  --goal-radius 0.35 \
+  --max-steps-per-goal 900 \
+  --heading-guard
 ```
-ugv_mpc_planner/
-├── CMakeLists.txt / package.xml       # ROS 2 ament 包
-├── include/multi_ugv_planner/        # 头文件 (solver, constraint builder, types…)
-├── src/                              # ugv_planner_node.cpp (主节点), acados_contouring_solver.cpp…
-├── acados/generated/contouring_solver/  # 生成的 acados 求解器 (contouring_unicycle, NH=12, NP=126)
-├── config/ugv_params.yaml    # 参数 (Test A/B 切换)
-├── launch/ugv_mpc.launch.py      # V-PRM + MPC 一键启动
-├── scripts/generate_contouring_solver.py  # 重新生成 acados 求解器
-└── multi_ugv_planner/                # Python: ugv_vprm_node.py, fake_odom.py, fake_scan.py
-RL/                                   # ★ RL 分支 (端到端 PPO 激光导航, MuJoCo)
-├── README.md                         # RL 模块说明 (奖励/训练管线/对照表)
-├── assets/ugv.xml                    # MuJoCo 车模 (两轮差速 + 90束激光)
-├── end2end_env.py                    # Gymnasium 环境 (激光观测 / 5条奖励 / A*老师 / LOS)
-├── vprm_planner.py                   # A* 网格全局路径
-├── collect_house_bc.py               # LOS 老师收集 BC 成功轨迹
-├── bc_pretrain.py                    # BC 预训练
-├── train_mj_ppo.py                   # PPO 微调 + 到达率评估
-└── requirements.txt                  # 依赖 (mujoco/gymnasium/torch/sb3)
-```
+
+Current note: the raw SAC checkpoint is not yet fully robust in every tested seed. The showcased continuous-goal demo uses a small heading-speed guard to reduce wide, high-speed turns during goal switching.
 
 ## License
 
