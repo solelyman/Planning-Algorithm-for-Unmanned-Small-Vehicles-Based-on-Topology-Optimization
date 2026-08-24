@@ -28,6 +28,12 @@ Git LFS or a GitHub Release asset if the trained weight needs to be shared.
 
 ![SAC continuous-goal demo](docs/images/sac_multigoal_seed2.gif)
 
+MuJoCo 3D render:
+
+![MuJoCo 3D SAC demo](docs/images/sac_mujoco_3d_seed2.gif)
+
+![MuJoCo 3D snapshot](docs/images/sac_mujoco_3d_seed2.png)
+
 Training curve:
 
 ![SAC training curve](docs/results/sac_curve.png)

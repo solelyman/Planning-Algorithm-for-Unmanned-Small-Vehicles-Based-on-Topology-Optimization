@@ -35,6 +35,8 @@ continuous-goal validation.
 
 ![Figure 2. SAC MuJoCo workflow](RL/docs/images/sac_mujoco_pipeline.svg)
 
+![MuJoCo 3D SAC demo](RL/docs/images/sac_mujoco_3d_seed2.gif)
+
 ![SAC continuous-goal demo](RL/docs/images/sac_multigoal_seed2.gif)
 
 | Test | Constraint formulation | `use_linear_constraints` | Remark |
@@ -70,17 +72,7 @@ Both tests are validated to **circle around an obstacle, run the approach straig
 
 ## System Architecture / 系统架构
 
-```
- /scan ──┐
- /odom ──┼──▶ ugv_vprm_node.py ──▶ /reference_path ──┐
-         │      (V-PRM global plan,                    │
-         │       approach & arrival)                   ▼
- /odom ──┼──────────────────────────────────▶ ugv_planner_node_exe (Contouring MPC)
-         │                                          │  acados SQP-RTI
- /scan ──┘  ──▶ scan_obstacles_ (ellipsoid/        │  NH=12 half-spaces or
-                    half-space obstacles)           ▼  N_ELL=12 soft ellipsoids
-                                               /cmd_vel
-```
+![Figure 2. V-PRM + Contouring MPC architecture](docs/images/mpc_architecture_figure2.svg)
 
 ## Quick Start / 快速开始
 
@@ -136,10 +128,12 @@ mpc:
 
 ## 正在推进 / Roadmap
 
-- **RL 端到端（进行中）**：`RL/` 分支 —— 端到端 PPO 激光导航。
-  MuJoCo 仿真（SquareWorld2 布局 1:1 对齐，障碍放中央、起终点分居两侧强制绕行），
-  BC 预热（A\* 全局路径 + LOS 老师演示）→ PPO 微调，目标全部绕障局到达率 ≥ 0.7，
-  之后部署到真机与 V-PRM+MPC 路线对比。详见 [`RL/README.md`](RL/README.md)。
+- **RL 导航（已加入）**：`RL/` 目录保留原端到端 PPO 激光导航基线，并新增
+  **SAC + MuJoCo 连续目标验证**。当前 SAC demo 使用 72 束 lidar、局部 guide、里程计状态输入，
+  在 MuJoCo 真实碰撞动力学中连续切换目标；公开展示版本使用轻量 heading guard 做大角度掉头限速。
+  详见 [`RL/README.md`](RL/README.md)。
+
+![MuJoCo 3D SAC demo](RL/docs/images/sac_mujoco_3d_seed2.gif)
 
 ## Directory Layout / 目录结构
 
