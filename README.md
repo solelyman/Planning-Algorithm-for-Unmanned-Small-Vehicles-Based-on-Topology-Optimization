@@ -39,10 +39,6 @@ Planning Algorithm for Unmanned Small Vehicles Based on Topology Optimization
   <img src="docs/images/mpc_architecture_figure2.svg" alt="Traditional V-PRM and MPC navigation framework" width="88%">
 </p>
 
-<p align="center">
-  <img src="docs/images/mpc_architecture_original.svg" alt="V-PRM and Contouring MPC module architecture" width="88%">
-</p>
-
 ```bash
 cd <ros2_ws>/src
 cp -r <this_repo> multi_ugv_planner
@@ -138,10 +134,6 @@ The classic route is a ROS 2 Humble navigation stack built around V-PRM and Cont
 
 <p align="center">
   <img src="docs/images/mpc_architecture_figure2.svg" alt="Traditional V-PRM and MPC navigation framework" width="88%">
-</p>
-
-<p align="center">
-  <img src="docs/images/mpc_architecture_original.svg" alt="V-PRM and Contouring MPC module architecture" width="88%">
 </p>
 
 ```bash
